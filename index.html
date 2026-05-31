@@ -1,491 +1,101 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PFM - Manajemen Keuangan Pribadi</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="container">
-            <div class="logo">💰 PFM - Keuangan Pribadi</div>
-            <ul class="nav-menu">
-                <li><a href="#beranda">Beranda</a></li>
-                <li><a href="#formula">Formula</a></li>
-                <li><a href="#kalkulator">Kalkulator</a></li>
-                <li><a href="#panduan">Panduan</a></li>
-            </ul>
-        </div>
-    </nav>
+<!-- Financial Model Upload & Parser Section -->
+<section id="model-analyzer" class="model-analyzer">
+    <div class="container">
+        <h2>📊 Financial Model Analyzer</h2>
+        <p class="section-subtitle">Upload file Excel/CSV Anda dan dapatkan analisis finansial otomatis</p>
+        
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <div class="upload-card">
+                <h3>1️⃣ Upload File Keuangan Anda</h3>
+                <div class="upload-area" id="uploadArea">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p><strong>Drag & drop file Excel/CSV di sini</strong></p>
+                    <p style="font-size: 0.9rem; color: #999;">atau klik untuk browse</p>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+                </div>
+                <div id="fileStatus"></div>
+            </div>
 
-    <!-- Hero Section -->
-    <section id="beranda" class="hero">
-        <div class="container">
-            <h1>Manajemen Keuangan Pribadi (PFM)</h1>
-            <p>Pahami keuangan Anda dengan mudah, bahkan tanpa latar belakang finansial</p>
-            <a href="#formula" class="cta-button">Mulai Belajar</a>
+            <!-- Template Section -->
+            <div class="upload-card">
+                <h3>📋 Template Siap Pakai</h3>
+                <p>Atau gunakan template kami untuk memulai:</p>
+                <div class="template-buttons">
+                    <button class="template-btn" onclick="loadTemplate('personal')">
+                        👤 Personal Finance
+                    </button>
+                    <button class="template-btn" onclick="loadTemplate('business')">
+                        🏢 Business Model
+                    </button>
+                    <button class="template-btn" onclick="loadTemplate('investment')">
+                        📈 Investment Portfolio
+                    </button>
+                    <button class="template-btn" onclick="loadTemplate('lambda')">
+                        🏭 Lambda Corporation
+                    </button>
+                </div>
+            </div>
         </div>
-    </section>
 
-    <!-- Formula Section -->
-    <section id="formula" class="formulas">
-        <div class="container">
-            <h2>Formula Keuangan yang Perlu Anda Ketahui</h2>
+        <!-- Analysis Results -->
+        <div id="analysisResults" class="analysis-results" style="display: none;">
+            <h3>📈 Hasil Analisis Otomatis</h3>
             
-            <!-- Formula 1: Bunga Sederhana -->
-            <div class="formula-card">
-                <h3>1. Bunga Sederhana (Simple Interest)</h3>
-                <div class="formula-box">
-                    <p><strong>Formula:</strong> I = P × r × t</p>
-                    <p><strong>Keterangan:</strong></p>
-                    <ul>
-                        <li>I = Bunga (Interest)</li>
-                        <li>P = Pokok (Principal)</li>
-                        <li>r = Tingkat bunga tahunan (%)</li>
-                        <li>t = Waktu (tahun)</li>
-                    </ul>
-                </div>
-                <div class="explanation">
-                    <h4>📖 Penjelasan Sederhana:</h4>
-                    <p>Bunga sederhana adalah keuntungan yang Anda dapatkan ketika menabung atau keuntungan yang harus dibayarkan saat meminjam. Bunga dihitung hanya dari jumlah awal, tidak dari bunga sebelumnya.</p>
-                    <h4>💡 Contoh Kehidupan Sehari-hari:</h4>
-                    <p>Anda menabung Rp 1.000.000 di bank dengan bunga 5% per tahun selama 2 tahun.</p>
-                    <p><strong>Perhitungan:</strong> I = 1.000.000 × 5% × 2 = Rp 100.000</p>
-                    <p>Total uang Anda menjadi: Rp 1.100.000</p>
-                </div>
+            <!-- Financial Summary -->
+            <div class="analysis-card">
+                <h4>💰 Ringkasan Keuangan</h4>
+                <div id="summaryStat" class="summary-stats"></div>
             </div>
 
-            <!-- Formula 2: Bunga Majemuk -->
-            <div class="formula-card">
-                <h3>2. Bunga Majemuk (Compound Interest)</h3>
-                <div class="formula-box">
-                    <p><strong>Formula:</strong> A = P(1 + r/n)^(nt)</p>
-                    <p><strong>Keterangan:</strong></p>
-                    <ul>
-                        <li>A = Jumlah akhir</li>
-                        <li>P = Pokok awal</li>
-                        <li>r = Tingkat bunga tahunan (desimal)</li>
-                        <li>n = Frekuensi perhitungan bunga per tahun</li>
-                        <li>t = Waktu (tahun)</li>
-                    </ul>
-                </div>
-                <div class="explanation">
-                    <h4>📖 Penjelasan Sederhana:</h4>
-                    <p>Bunga majemuk adalah bunga yang dihitung dari pokok PLUS bunga sebelumnya. Uang Anda berkembang lebih cepat karena bunga juga menghasilkan bunga (sering disebut "miracle of compound interest").</p>
-                    <h4>💡 Contoh Kehidupan Sehari-hari:</h4>
-                    <p>Anda menabung Rp 1.000.000 dengan bunga 5% per tahun, dibungakan setiap bulan, selama 2 tahun.</p>
-                    <p><strong>Perhitungan:</strong> A = 1.000.000(1 + 0.05/12)^(12×2) ≈ Rp 1.104.895</p>
-                    <p>Perhatikan: Ini lebih besar dari bunga sederhana! Itulah keajaiban bunga majemuk.</p>
-                </div>
+            <!-- Key Metrics -->
+            <div class="analysis-card">
+                <h4>📊 Metrik Keuangan Utama</h4>
+                <div id="keyMetrics" class="metrics-grid"></div>
             </div>
 
-            <!-- Formula 3: Nilai Sekarang -->
-            <div class="formula-card">
-                <h3>3. Nilai Sekarang (Present Value)</h3>
-                <div class="formula-box">
-                    <p><strong>Formula:</strong> PV = FV / (1 + r)^t</p>
-                    <p><strong>Keterangan:</strong></p>
-                    <ul>
-                        <li>PV = Nilai Sekarang</li>
-                        <li>FV = Nilai di Masa Depan</li>
-                        <li>r = Tingkat diskonto/bunga</li>
-                        <li>t = Waktu (tahun)</li>
-                    </ul>
-                </div>
-                <div class="explanation">
-                    <h4>📖 Penjelasan Sederhana:</h4>
-                    <p>Nilai sekarang menjawab pertanyaan: "Berapa nilai uang di masa depan jika dihitung dengan harga sekarang?" Uang Rp 1 juta di masa depan tidak sama berharganya dengan Rp 1 juta hari ini.</p>
-                    <h4>💡 Contoh Kehidupan Sehari-hari:</h4>
-                    <p>Anda akan menerima Rp 10.000.000 dalam 5 tahun. Berapa nilainya hari ini jika tingkat bunga 8%?</p>
-                    <p><strong>Perhitungan:</strong> PV = 10.000.000 / (1 + 0.08)^5 ≈ Rp 6.805.832</p>
-                    <p>Artinya: Uang Rp 10 juta di 5 tahun mendatang sama nilainya dengan Rp 6.8 juta hari ini.</p>
-                </div>
+            <!-- Auto-populated Calculators -->
+            <div class="analysis-card">
+                <h4>🧮 Kalkulator Otomatis</h4>
+                <div id="autoCalculators"></div>
             </div>
 
-            <!-- Formula 4: Nilai di Masa Depan -->
-            <div class="formula-card">
-                <h3>4. Nilai di Masa Depan (Future Value)</h3>
-                <div class="formula-box">
-                    <p><strong>Formula:</strong> FV = PV × (1 + r)^t</p>
-                    <p><strong>Keterangan:</strong></p>
-                    <ul>
-                        <li>FV = Nilai di Masa Depan</li>
-                        <li>PV = Nilai Sekarang</li>
-                        <li>r = Tingkat bunga/pertumbuhan</li>
-                        <li>t = Waktu (tahun)</li>
-                    </ul>
-                </div>
-                <div class="explanation">
-                    <h4>📖 Penjelasan Sederhana:</h4>
-                    <p>Nilai di masa depan menjawab: "Berapa nilai uang saya di masa depan?" Ini kebalikan dari Nilai Sekarang. Digunakan untuk merencanakan investasi jangka panjang.</p>
-                    <h4>💡 Contoh Kehidupan Sehari-hari:</h4>
-                    <p>Anda menabung Rp 5.000.000 hari ini dengan bunga 7% per tahun. Berapa jumlahnya dalam 10 tahun?</p>
-                    <p><strong>Perhitungan:</strong> FV = 5.000.000 × (1 + 0.07)^10 ≈ Rp 9.835.476</p>
-                    <p>Uang Anda hampir berlipat dua dalam 10 tahun!</p>
-                </div>
+            <!-- Financial Health Score -->
+            <div class="analysis-card">
+                <h4>🎯 Skor Kesehatan Keuangan</h4>
+                <div id="healthScore" class="health-score"></div>
             </div>
 
-            <!-- Formula 5: ROI -->
-            <div class="formula-card">
-                <h3>5. Pengembalian Investasi (ROI - Return on Investment)</h3>
-                <div class="formula-box">
-                    <p><strong>Formula:</strong> ROI = (Keuntungan / Investasi Awal) × 100%</p>
-                    <p><strong>Atau:</strong> ROI = ((Nilai Akhir - Nilai Awal) / Nilai Awal) × 100%</p>
-                </div>
-                <div class="explanation">
-                    <h4>📖 Penjelasan Sederhana:</h4>
-                    <p>ROI menunjukkan berapa persen keuntungan atau kerugian dari investasi Anda. Ini adalah cara terbaik untuk membandingkan investasi yang berbeda.</p>
-                    <h4>💡 Contoh Kehidupan Sehari-hari:</h4>
-                    <p>Anda beli saham dengan harga Rp 1.000.000, kemudian dijual dengan harga Rp 1.300.000.</p>
-                    <p><strong>Perhitungan:</strong> ROI = ((1.300.000 - 1.000.000) / 1.000.000) × 100% = 30%</p>
-                    <p>Investasi Anda menghasilkan keuntungan 30%!</p>
-                </div>
+            <!-- Recommendations -->
+            <div class="analysis-card">
+                <h4>💡 Rekomendasi</h4>
+                <div id="recommendations"></div>
             </div>
 
-            <!-- Formula 6: Break-even Point -->
-            <div class="formula-card">
-                <h3>6. Titik Impas (Break-even Point)</h3>
-                <div class="formula-box">
-                    <p><strong>Formula:</strong> BEP = Biaya Tetap / (Harga Jual - Biaya Variabel per Unit)</p>
-                    <p><strong>Atau dalam Rupiah:</strong> BEP = Biaya Tetap / Margin Kontribusi (%)</p>
-                </div>
-                <div class="explanation">
-                    <h4>📖 Penjelasan Sederhana:</h4>
-                    <p>Break-even point adalah titik di mana Anda tidak untung dan tidak rugi. Ini penting untuk bisnis kecil dan usaha sampingan.</p>
-                    <h4>💡 Contoh Kehidupan Sehari-hari:</h4>
-                    <p>Anda membuka toko online:</p>
-                    <ul>
-                        <li>Biaya tetap (sewa, gaji): Rp 5.000.000/bulan</li>
-                        <li>Harga jual per produk: Rp 100.000</li>
-                        <li>Biaya per produk: Rp 60.000</li>
-                    </ul>
-                    <p><strong>Perhitungan:</strong> BEP = 5.000.000 / (100.000 - 60.000) = 125 unit</p>
-                    <p>Anda harus menjual minimal 125 unit per bulan untuk tidak rugi.</p>
-                </div>
-            </div>
-
-            <!-- Formula 7: Debt-to-Income Ratio -->
-            <div class="formula-card">
-                <h3>7. Rasio Utang terhadap Penghasilan (Debt-to-Income Ratio)</h3>
-                <div class="formula-box">
-                    <p><strong>Formula:</strong> DTI = (Total Utang Bulanan / Pendapatan Bulanan) × 100%</p>
-                </div>
-                <div class="explanation">
-                    <h4>📖 Penjelasan Sederhana:</h4>
-                    <p>DTI menunjukkan persentase pendapatan Anda yang digunakan untuk membayar utang. Semakin rendah, semakin sehat keuangan Anda.</p>
-                    <h4>💡 Contoh Kehidupan Sehari-hari:</h4>
-                    <p>Anda memiliki:</p>
-                    <ul>
-                        <li>Pendapatan bulanan: Rp 10.000.000</li>
-                        <li>Cicilan kredit rumah: Rp 3.000.000</li>
-                        <li>Cicilan mobil: Rp 1.500.000</li>
-                        <li>Cicilan kartu kredit: Rp 500.000</li>
-                    </ul>
-                    <p><strong>Perhitungan:</strong> DTI = (3.000.000 + 1.500.000 + 500.000) / 10.000.000 × 100% = 50%</p>
-                    <p>Setengah dari pendapatan Anda habis untuk membayar utang. Ini terlalu tinggi!</p>
-                    <p><strong>Ideal:</strong> DTI di bawah 36% dianggap sehat.</p>
-                </div>
-            </div>
-
-            <!-- Formula 8: Savings Rate -->
-            <div class="formula-card">
-                <h3>8. Tingkat Penghematan (Savings Rate)</h3>
-                <div class="formula-box">
-                    <p><strong>Formula:</strong> Savings Rate = (Penghematan / Pendapatan Bersih) × 100%</p>
-                </div>
-                <div class="explanation">
-                    <h4>📖 Penjelasan Sederhana:</h4>
-                    <p>Savings rate menunjukkan persentase uang Anda yang ditabung. Semakin tinggi, semakin bagus untuk keuangan jangka panjang Anda.</p>
-                    <h4>💡 Contoh Kehidupan Sehari-hari:</h4>
-                    <p>Anda memiliki:</p>
-                    <ul>
-                        <li>Penghasilan bersih: Rp 8.000.000</li>
-                        <li>Pengeluaran: Rp 5.000.000</li>
-                        <li>Tabungan: Rp 3.000.000</li>
-                    </ul>
-                    <p><strong>Perhitungan:</strong> Savings Rate = (3.000.000 / 8.000.000) × 100% = 37.5%</p>
-                    <p>Anda menabung 37.5% dari penghasilan - sangat bagus!</p>
-                    <p><strong>Target ideal:</strong> Minimal 20% dari penghasilan.</p>
-                </div>
-            </div>
-
-            <!-- Formula 9: Expense Ratio -->
-            <div class="formula-card">
-                <h3>9. Rasio Pengeluaran (Expense Ratio)</h3>
-                <div class="formula-box">
-                    <p><strong>Formula:</strong> Expense Ratio = (Pengeluaran Tertentu / Total Pengeluaran) × 100%</p>
-                </div>
-                <div class="explanation">
-                    <h4>📖 Penjelasan Sederhana:</h4>
-                    <p>Expense ratio membantu Anda melihat persentase masing-masing pengeluaran. Berguna untuk membuat anggaran yang seimbang.</p>
-                    <h4>💡 Contoh Kehidupan Sehari-hari:</h4>
-                    <p>Total pengeluaran Anda Rp 10.000.000, dengan rincian:</p>
-                    <ul>
-                        <li>Makan & minum: Rp 3.000.000</li>
-                        <li>Transportasi: Rp 2.000.000</li>
-                        <li>Hiburan: Rp 1.500.000</li>
-                        <li>Lainnya: Rp 3.500.000</li>
-                    </ul>
-                    <p><strong>Perhitungan Makan:</strong> (3.000.000 / 10.000.000) × 100% = 30%</p>
-                    <p>30% pengeluaran untuk makan - Anda bisa kurangi ini.</p>
-                </div>
-            </div>
-
-            <!-- Formula 10: EMI -->
-            <div class="formula-card">
-                <h3>10. Cicilan Bulanan (EMI - Equated Monthly Installment)</h3>
-                <div class="formula-box">
-                    <p><strong>Formula:</strong> EMI = P × [r(1+r)^n] / [(1+r)^n-1]</p>
-                    <p><strong>Keterangan:</strong></p>
-                    <ul>
-                        <li>P = Jumlah pinjaman</li>
-                        <li>r = Suku bunga bulanan (bunga tahunan ÷ 12)</li>
-                        <li>n = Jumlah bulan pembayaran</li>
-                    </ul>
-                </div>
-                <div class="explanation">
-                    <h4>📖 Penjelasan Sederhana:</h4>
-                    <p>EMI adalah rumus untuk menghitung cicilan tetap bulanan Anda saat meminjam uang (kredit, KPR, cicilan mobil, dll).</p>
-                    <h4>💡 Contoh Kehidupan Sehari-hari:</h4>
-                    <p>Anda mengambil KPR (Kredit Pemilikan Rumah):</p>
-                    <ul>
-                        <li>Jumlah pinjaman: Rp 500.000.000</li>
-                        <li>Bunga: 5% per tahun (0.417% per bulan)</li>
-                        <li>Jangka waktu: 20 tahun (240 bulan)</li>
-                    </ul>
-                    <p><strong>Perhitungan:</strong> EMI ≈ Rp 2.987.633/bulan</p>
-                    <p>Anda membayar cicilan yang sama setiap bulan selama 20 tahun.</p>
-                </div>
-            </div>
+            <button class="export-btn" onclick="exportReport()">📥 Export Report</button>
         </div>
-    </section>
 
-    <!-- Calculator Section -->
-    <section id="kalkulator" class="calculators">
-        <div class="container">
-            <h2>Kalkulator Interaktif</h2>
-            
-            <!-- Calculator 1: Compound Interest -->
-            <div class="calc-card">
-                <h3>Kalkulator Bunga Majemuk</h3>
-                <div class="calc-form">
-                    <div class="input-group">
-                        <label>Jumlah Awal (Rp):</label>
-                        <input type="number" id="principal" placeholder="1000000" value="1000000">
-                    </div>
-                    <div class="input-group">
-                        <label>Tingkat Bunga per Tahun (%):</label>
-                        <input type="number" id="rate" placeholder="5" value="5" step="0.1">
-                    </div>
-                    <div class="input-group">
-                        <label>Waktu (Tahun):</label>
-                        <input type="number" id="time" placeholder="10" value="10">
-                    </div>
-                    <div class="input-group">
-                        <label>Bungakan per Tahun:</label>
-                        <select id="frequency">
-                            <option value="1">Tahunan</option>
-                            <option value="2">Semesteran</option>
-                            <option value="4">Kuartalan</option>
-                            <option value="12" selected>Bulanan</option>
-                        </select>
-                    </div>
-                    <button class="calc-btn" onclick="calculateCompoundInterest()">Hitung</button>
-                    <div id="resultCompound" class="result"></div>
-                </div>
-            </div>
-
-            <!-- Calculator 2: ROI -->
-            <div class="calc-card">
-                <h3>Kalkulator ROI</h3>
-                <div class="calc-form">
-                    <div class="input-group">
-                        <label>Investasi Awal (Rp):</label>
-                        <input type="number" id="initialInvestment" placeholder="1000000" value="1000000">
-                    </div>
-                    <div class="input-group">
-                        <label>Nilai Sekarang (Rp):</label>
-                        <input type="number" id="currentValue" placeholder="1300000" value="1300000">
-                    </div>
-                    <button class="calc-btn" onclick="calculateROI()">Hitung</button>
-                    <div id="resultROI" class="result"></div>
-                </div>
-            </div>
-
-            <!-- Calculator 3: EMI -->
-            <div class="calc-card">
-                <h3>Kalkulator Cicilan Bulanan (EMI)</h3>
-                <div class="calc-form">
-                    <div class="input-group">
-                        <label>Jumlah Pinjaman (Rp):</label>
-                        <input type="number" id="loanAmount" placeholder="500000000" value="500000000">
-                    </div>
-                    <div class="input-group">
-                        <label>Bunga per Tahun (%):</label>
-                        <input type="number" id="annualRate" placeholder="5" value="5" step="0.1">
-                    </div>
-                    <div class="input-group">
-                        <label>Jangka Waktu (Tahun):</label>
-                        <input type="number" id="loanTerm" placeholder="20" value="20">
-                    </div>
-                    <button class="calc-btn" onclick="calculateEMI()">Hitung</button>
-                    <div id="resultEMI" class="result"></div>
-                </div>
-            </div>
-
-            <!-- Calculator 4: DTI -->
-            <div class="calc-card">
-                <h3>Kalkulator Rasio Utang (DTI)</h3>
-                <div class="calc-form">
-                    <div class="input-group">
-                        <label>Pendapatan Bulanan (Rp):</label>
-                        <input type="number" id="monthlyIncome" placeholder="10000000" value="10000000">
-                    </div>
-                    <div class="input-group">
-                        <label>Total Cicilan Utang Bulanan (Rp):</label>
-                        <input type="number" id="monthlyDebt" placeholder="5000000" value="5000000">
-                    </div>
-                    <button class="calc-btn" onclick="calculateDTI()">Hitung</button>
-                    <div id="resultDTI" class="result"></div>
-                </div>
-            </div>
-
-            <!-- Calculator 5: Savings Rate -->
-            <div class="calc-card">
-                <h3>Kalkulator Tingkat Penghematan</h3>
-                <div class="calc-form">
-                    <div class="input-group">
-                        <label>Pendapatan Bersih Bulanan (Rp):</label>
-                        <input type="number" id="netIncome" placeholder="8000000" value="8000000">
-                    </div>
-                    <div class="input-group">
-                        <label>Tabungan Bulanan (Rp):</label>
-                        <input type="number" id="monthlysSavings" placeholder="2400000" value="2400000">
-                    </div>
-                    <button class="calc-btn" onclick="calculateSavingsRate()">Hitung</button>
-                    <div id="resultSavings" class="result"></div>
-                </div>
-            </div>
-
-            <!-- Calculator 6: Break-even Point -->
-            <div class="calc-card">
-                <h3>Kalkulator Break-even Point</h3>
-                <div class="calc-form">
-                    <div class="input-group">
-                        <label>Biaya Tetap Bulanan (Rp):</label>
-                        <input type="number" id="fixedCost" placeholder="5000000" value="5000000">
-                    </div>
-                    <div class="input-group">
-                        <label>Harga Jual per Unit (Rp):</label>
-                        <input type="number" id="sellingPrice" placeholder="100000" value="100000">
-                    </div>
-                    <div class="input-group">
-                        <label>Biaya Variabel per Unit (Rp):</label>
-                        <input type="number" id="variableCost" placeholder="60000" value="60000">
-                    </div>
-                    <button class="calc-btn" onclick="calculateBEP()">Hitung</button>
-                    <div id="resultBEP" class="result"></div>
-                </div>
-            </div>
-
-            <!-- Calculator 7: Future Value -->
-            <div class="calc-card">
-                <h3>Kalkulator Nilai di Masa Depan</h3>
-                <div class="calc-form">
-                    <div class="input-group">
-                        <label>Tabungan Saat Ini (Rp):</label>
-                        <input type="number" id="presentValueFV" placeholder="5000000" value="5000000">
-                    </div>
-                    <div class="input-group">
-                        <label>Tingkat Pertumbuhan (%):</label>
-                        <input type="number" id="growthRate" placeholder="7" value="7" step="0.1">
-                    </div>
-                    <div class="input-group">
-                        <label>Jangka Waktu (Tahun):</label>
-                        <input type="number" id="years" placeholder="10" value="10">
-                    </div>
-                    <button class="calc-btn" onclick="calculateFutureValue()">Hitung</button>
-                    <div id="resultFutureValue" class="result"></div>
-                </div>
-            </div>
+        <!-- Data Preview -->
+        <div id="dataPreview" class="data-preview" style="display: none;">
+            <h3>📋 Preview Data</h3>
+            <div id="previewTable"></div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Guide Section -->
-    <section id="panduan" class="guide">
-        <div class="container">
-            <h2>Panduan Praktis Manajemen Keuangan</h2>
-            
-            <div class="guide-card">
-                <h3>📊 Prinsip 50/30/20</h3>
-                <p>Prinsip ini membagi pendapatan Anda menjadi tiga bagian:</p>
-                <ul>
-                    <li><strong>50%</strong> untuk kebutuhan (makan, transportasi, tempat tinggal)</li>
-                    <li><strong>30%</strong> untuk keinginan (hiburan, hobi, liburan)</li>
-                    <li><strong>20%</strong> untuk tabungan dan pelunasan utang</li>
-                </ul>
-                <p><strong>Contoh:</strong> Jika pendapatan Rp 10 juta, maka Rp 5 juta untuk kebutuhan, Rp 3 juta untuk keinginan, dan Rp 2 juta untuk tabungan.</p>
-            </div>
-
-            <div class="guide-card">
-                <h3>💰 Aturan Investasi Awal</h3>
-                <ul>
-                    <li><strong>Dana Darurat:</strong> Kumpulkan dana 3-6 bulan pengeluaran untuk keadaan darurat</li>
-                    <li><strong>Investasi Rutin:</strong> Mulai dari investasi kecil, konsisten lebih penting dari jumlah besar</li>
-                    <li><strong>Diversifikasi:</strong> Jangan taruh semua uang di satu tempat</li>
-                </ul>
-            </div>
-
-            <div class="guide-card">
-                <h3>🛑 Kesalahan yang Harus Dihindari</h3>
-                <ul>
-                    <li>❌ Tidak membuat anggaran keuangan</li>
-                    <li>❌ Terlalu banyak utang konsumtif (membeli barang dengan cicilan)</li>
-                    <li>❌ Tidak memiliki dana darurat</li>
-                    <li>❌ Berinvestasi tanpa memahami risikonya</li>
-                    <li>❌ Tidak membedakan antara kebutuhan dan keinginan</li>
-                    <li>❌ Tergoda dengan promosi impulsif</li>
-                </ul>
-            </div>
-
-            <div class="guide-card">
-                <h3>✅ Kebiasaan Keuangan yang Baik</h3>
-                <ul>
-                    <li>✓ Buat anggaran dan pantau pengeluaran setiap bulan</li>
-                    <li>✓ Bayar tagihan tepat waktu</li>
-                    <li>✓ Hitung DTI Anda dan usahakan di bawah 36%</li>
-                    <li>✓ Naikkan tabungan sedikit demi sedikit</li>
-                    <li>✓ Mulai investasi sedari muda</li>
-                    <li>✓ Edukasi diri tentang produk keuangan sebelum membeli</li>
-                    <li>✓ Review keuangan Anda setiap kuartal</li>
-                </ul>
-            </div>
-
-            <div class="guide-card">
-                <h3>🎯 Langkah-langkah Mulai Sekarang</h3>
-                <ol>
-                    <li><strong>Catat semua penghasilan dan pengeluaran</strong> selama 1 bulan</li>
-                    <li><strong>Analisis</strong> kemana uang Anda pergi</li>
-                    <li><strong>Buat anggaran</strong> untuk bulan depan</li>
-                    <li><strong>Buat rencana pembayaran utang</strong> jika ada</li>
-                    <li><strong>Mulai tabungan</strong> meski Rp 100.000 per hari</li>
-                    <li><strong>Pelajari investasi</strong> untuk uang Anda bertumbuh</li>
-                    <li><strong>Review progress</strong> setiap bulan</li>
-                </ol>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2024 PFM - Manajemen Keuangan Pribadi. Dibuat untuk memudahkan setiap orang memahami keuangan mereka.</p>
-            <p>Disclaimer: Website ini bersifat edukasi. Untuk saran investasi profesional, konsultasikan dengan ahli keuangan.</p>
-        </div>
-    </footer>
-
-    <script src="script.js"></script>
-</body>
-</html>
+<!-- Add this to Navigation -->
+<script>
+    // Add navigation item for model analyzer if not exists
+    document.addEventListener('DOMContentLoaded', function() {
+        const navMenu = document.querySelector('.nav-menu');
+        if (navMenu) {
+            const modelLink = document.createElement('li');
+            modelLink.innerHTML = '<a href="#model-analyzer">Model Analyzer</a>';
+            navMenu.appendChild(modelLink);
+        }
+    });
+</script>
