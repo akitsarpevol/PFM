@@ -1,101 +1,1129 @@
-<!-- Financial Model Upload & Parser Section -->
-<section id="model-analyzer" class="model-analyzer">
-    <div class="container">
-        <h2>📊 Financial Model Analyzer</h2>
-        <p class="section-subtitle">Upload file Excel/CSV Anda dan dapatkan analisis finansial otomatis</p>
-        
-        <!-- Upload Section -->
-        <div class="upload-section">
-            <div class="upload-card">
-                <h3>1️⃣ Upload File Keuangan Anda</h3>
-                <div class="upload-area" id="uploadArea">
-                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                    <p><strong>Drag & drop file Excel/CSV di sini</strong></p>
-                    <p style="font-size: 0.9rem; color: #999;">atau klik untuk browse</p>
-                    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
-                </div>
-                <div id="fileStatus"></div>
-            </div>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PFM Academy – Belajar Keuangan & AI Model Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --ink: #0c0c0c;
+  --cream: #f6f1e9;
+  --gold: #c9a84c;
+  --gold-lt: #f0d898;
+  --rust: #b84c2e;
+  --teal: #1a6b6b;
+  --teal-lt: #e6f4f4;
+  --paper: #faf8f3;
+  --muted: #6b6560;
+  --border: #ddd5c5;
+  --white: #fff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);line-height:1.7;overflow-x:hidden}
 
-            <!-- Template Section -->
-            <div class="upload-card">
-                <h3>📋 Template Siap Pakai</h3>
-                <p>Atau gunakan template kami untuk memulai:</p>
-                <div class="template-buttons">
-                    <button class="template-btn" onclick="loadTemplate('personal')">
-                        👤 Personal Finance
-                    </button>
-                    <button class="template-btn" onclick="loadTemplate('business')">
-                        🏢 Business Model
-                    </button>
-                    <button class="template-btn" onclick="loadTemplate('investment')">
-                        📈 Investment Portfolio
-                    </button>
-                    <button class="template-btn" onclick="loadTemplate('lambda')">
-                        🏭 Lambda Corporation
-                    </button>
-                </div>
-            </div>
-        </div>
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--ink);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:58px}
+.nav-logo{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.15rem;font-weight:700;letter-spacing:1px;cursor:pointer}
+.nav-links{display:flex;gap:1.8rem;list-style:none}
+.nav-links a{color:#bbb;text-decoration:none;font-size:.82rem;letter-spacing:.4px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--gold)}
 
-        <!-- Analysis Results -->
-        <div id="analysisResults" class="analysis-results" style="display: none;">
-            <h3>📈 Hasil Analisis Otomatis</h3>
-            
-            <!-- Financial Summary -->
-            <div class="analysis-card">
-                <h4>💰 Ringkasan Keuangan</h4>
-                <div id="summaryStat" class="summary-stats"></div>
-            </div>
+/* ── PAGE TABS ── */
+.page-tabs{display:flex;position:fixed;top:58px;left:0;right:0;z-index:199;background:#1a1a1a;border-bottom:1px solid #2a2a2a}
+.page-tab{flex:1;padding:10px;text-align:center;font-size:.78rem;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#666;cursor:pointer;transition:all .2s;border-bottom:2px solid transparent}
+.page-tab.active{color:var(--gold);border-bottom-color:var(--gold);background:#0c0c0c}
+.page-tab:hover:not(.active){color:#bbb}
 
-            <!-- Key Metrics -->
-            <div class="analysis-card">
-                <h4>📊 Metrik Keuangan Utama</h4>
-                <div id="keyMetrics" class="metrics-grid"></div>
-            </div>
+/* ── PAGES ── */
+.page{display:none}
+.page.active{display:block}
 
-            <!-- Auto-populated Calculators -->
-            <div class="analysis-card">
-                <h4>🧮 Kalkulator Otomatis</h4>
-                <div id="autoCalculators"></div>
-            </div>
+/* ── HERO ── */
+.hero{min-height:100vh;background:var(--ink);display:grid;grid-template-columns:1.1fr .9fr;align-items:center;padding:120px 5vw 60px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 70% at 65% 50%,rgba(26,107,107,.18) 0%,transparent 65%);pointer-events:none}
+.hero-badge{display:inline-block;background:var(--gold);color:var(--ink);font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 14px;border-radius:2px;margin-bottom:1.5rem}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.6rem,4.5vw,4.2rem);font-weight:900;line-height:1.08;color:#fff;margin-bottom:1.4rem}
+.hero h1 span{color:var(--gold)}
+.hero-desc{color:#aaa;font-size:1rem;max-width:460px;margin-bottom:2.5rem;font-weight:300}
+.btn-primary{display:inline-block;background:var(--gold);color:var(--ink);padding:13px 30px;font-weight:600;font-size:.88rem;letter-spacing:.5px;text-decoration:none;border-radius:2px;border:none;cursor:pointer;transition:transform .2s,background .2s}
+.btn-primary:hover{background:var(--gold-lt);transform:translateY(-2px)}
+.btn-ghost{display:inline-block;border:1.5px solid #444;color:#aaa;padding:12px 28px;font-weight:500;font-size:.88rem;text-decoration:none;border-radius:2px;cursor:pointer;margin-left:1rem;transition:all .2s;background:transparent}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.hero-right{display:flex;flex-direction:column;gap:.9rem;padding-left:3.5rem;animation:fadeUp 1s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.stat-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:8px;padding:1.4rem}
+.stat-card .lbl{color:#777;font-size:.7rem;letter-spacing:1px;text-transform:uppercase}
+.stat-card .val{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--gold)}
+.stat-card .sub{color:#888;font-size:.82rem;margin-top:3px}
 
-            <!-- Financial Health Score -->
-            <div class="analysis-card">
-                <h4>🎯 Skor Kesehatan Keuangan</h4>
-                <div id="healthScore" class="health-score"></div>
-            </div>
+/* ── STRIP ── */
+.strip{background:var(--gold);color:var(--ink);padding:1rem 5vw;display:flex;gap:2.5rem;align-items:center;overflow:hidden;flex-wrap:wrap}
+.strip-item{display:flex;align-items:center;gap:.5rem;font-size:.82rem;font-weight:600;white-space:nowrap}
+.strip-item .dot{width:5px;height:5px;border-radius:50%;background:var(--ink);flex-shrink:0}
 
-            <!-- Recommendations -->
-            <div class="analysis-card">
-                <h4>💡 Rekomendasi</h4>
-                <div id="recommendations"></div>
-            </div>
+/* ── SECTIONS ── */
+section{padding:5rem 5vw}
+.sec-tag{font-size:.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:.7rem}
+.sec-title{font-family:'Playfair Display',serif;font-size:clamp(1.7rem,2.8vw,2.6rem);font-weight:700;line-height:1.2;margin-bottom:.9rem}
+.sec-sub{color:var(--muted);font-size:.95rem;max-width:540px;font-weight:300;margin-bottom:2.8rem;line-height:1.8}
 
-            <button class="export-btn" onclick="exportReport()">📥 Export Report</button>
-        </div>
+/* ── COVERAGE CHECK ── */
+#coverage{background:var(--white)}
+.coverage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem}
+.cov-card{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.cov-header{padding:1.2rem 1.4rem;display:flex;align-items:center;gap:1rem}
+.cov-num{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;line-height:1;flex-shrink:0}
+.cov-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700}
+.cov-subtitle{color:var(--muted);font-size:.78rem;margin-top:2px}
+.cov-body{padding:.8rem 1.4rem 1.2rem}
+.cov-topics{list-style:none}
+.cov-topics li{display:flex;align-items:flex-start;gap:.6rem;padding:.35rem 0;border-bottom:1px solid #f0ece5;font-size:.82rem;color:var(--muted)}
+.cov-topics li:last-child{border-bottom:none}
+.cov-topics li .check{color:var(--teal);flex-shrink:0;font-weight:700;margin-top:1px}
+.cov-topics li .sheet{font-size:.68rem;background:var(--teal-lt);color:var(--teal);padding:1px 7px;border-radius:10px;margin-left:auto;white-space:nowrap;flex-shrink:0;font-weight:600}
+.cov-card.c1 .cov-header{background:#fff9ec}.cov-card.c1 .cov-num{color:var(--gold)}
+.cov-card.c2 .cov-header{background:#ecf7f7}.cov-card.c2 .cov-num{color:var(--teal)}
+.cov-card.c3 .cov-header{background:#fdf0ec}.cov-card.c3 .cov-num{color:var(--rust)}
+.cov-card.c4 .cov-header{background:#f0f4ff}.cov-card.c4 .cov-num{color:#3a5fcd}
+.cov-card.c5 .cov-header{background:#f3f0ff}.cov-card.c5 .cov-num{color:#6b3fcd}
+.cov-card.c6 .cov-header{background:#fff0f5}.cov-card.c6 .cov-num{color:#b83f7a}
+.cov-card.c7 .cov-header{background:#f0fff4}.cov-card.c7 .cov-num{color:#2d7a4f}
 
-        <!-- Data Preview -->
-        <div id="dataPreview" class="data-preview" style="display: none;">
-            <h3>📋 Preview Data</h3>
-            <div id="previewTable"></div>
-        </div>
+/* ── DEEP DIVE ── */
+#deepdive{background:var(--cream)}
+.tabs-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem}
+.dtab{padding:8px 18px;border-radius:20px;font-size:.8rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);color:var(--muted);transition:all .2s;background:white}
+.dtab.active{background:var(--ink);color:var(--gold);border-color:var(--ink)}
+.topic-panel{display:none}
+.topic-panel.active{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start}
+.topic-explain{background:white;border-radius:10px;padding:2rem;border:1px solid var(--border)}
+.topic-explain h3{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:1rem}
+.explain-item{margin-bottom:1.2rem;padding-bottom:1.2rem;border-bottom:1px solid #f0ece5}
+.explain-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.explain-item .term{font-weight:600;font-size:.9rem;margin-bottom:.3rem}
+.explain-item .def{color:var(--muted);font-size:.85rem;line-height:1.7}
+.explain-item .analogy{background:var(--cream);border-left:3px solid var(--gold);padding:.7rem 1rem;border-radius:0 6px 6px 0;margin-top:.5rem;font-size:.82rem;color:var(--ink)}
+.topic-sheets{background:var(--ink);border-radius:10px;padding:2rem}
+.sheets-title{color:var(--gold);font-size:.72rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:1.2rem}
+.sheet-pill{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#ddd;padding:.5rem 1rem;border-radius:6px;font-size:.8rem;margin:.3rem;cursor:default;transition:background .2s}
+.sheet-pill .icon{font-size:1rem}
+
+/* ── AI ANALYZER ── */
+#analyzer{background:var(--ink);min-height:100vh;padding-top:120px}
+#analyzer .sec-tag{color:var(--gold-lt)}
+#analyzer .sec-title{color:white}
+#analyzer .sec-sub{color:#999}
+.analyzer-layout{display:grid;grid-template-columns:1fr 1.4fr;gap:2rem;align-items:start}
+
+/* Upload zone */
+.upload-zone{border:2px dashed #333;border-radius:12px;padding:3rem 2rem;text-align:center;transition:all .3s;cursor:pointer;position:relative}
+.upload-zone.dragover{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.upload-zone.has-file{border-color:var(--teal);border-style:solid;background:rgba(26,107,107,.08)}
+.upload-icon{font-size:3rem;margin-bottom:1rem;opacity:.6}
+.upload-title{color:#ddd;font-weight:600;margin-bottom:.4rem}
+.upload-sub{color:#666;font-size:.82rem}
+.upload-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.file-info{background:rgba(26,107,107,.15);border:1px solid rgba(26,107,107,.4);border-radius:8px;padding:1rem;margin-top:1rem;text-align:left}
+.file-info .fname{color:var(--teal-lt);font-weight:600;font-size:.9rem}
+.file-info .fmeta{color:#888;font-size:.78rem;margin-top:3px}
+
+/* Sheet selector */
+.sheet-selector{margin-top:1.2rem}
+.sheet-selector label{color:#888;font-size:.78rem;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:.5rem}
+.sheet-chips{display:flex;flex-wrap:wrap;gap:.4rem}
+.sheet-chip{padding:5px 12px;border-radius:20px;font-size:.75rem;font-weight:500;border:1px solid #333;color:#888;cursor:pointer;transition:all .2s}
+.sheet-chip.active{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+
+/* Analysis options */
+.analysis-opts{margin-top:1.2rem}
+.opt-title{color:#888;font-size:.78rem;letter-spacing:.5px;text-transform:uppercase;margin-bottom:.6rem}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.opt-btn{padding:.6rem;border:1px solid #2a2a2a;border-radius:6px;background:rgba(255,255,255,.03);color:#aaa;font-size:.78rem;cursor:pointer;transition:all .2s;text-align:center;font-weight:500}
+.opt-btn.active{border-color:var(--teal);color:var(--teal-lt);background:rgba(26,107,107,.12)}
+
+.analyze-btn{width:100%;margin-top:1.2rem;padding:14px;font-size:.9rem;font-weight:700;letter-spacing:.5px;background:var(--gold);color:var(--ink);border:none;border-radius:6px;cursor:pointer;transition:all .2s}
+.analyze-btn:hover:not(:disabled){background:var(--gold-lt);transform:translateY(-1px)}
+.analyze-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* Result panel */
+.result-panel{background:rgba(255,255,255,.03);border:1px solid #222;border-radius:12px;min-height:400px;overflow:hidden}
+.result-header{padding:1.2rem 1.5rem;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;gap:.7rem}
+.result-dot{width:8px;height:8px;border-radius:50%;background:#333}
+.result-dot.green{background:#2d7a4f}
+.result-dot.yellow{background:var(--gold)}
+.result-title{color:#666;font-size:.8rem;letter-spacing:.5px;text-transform:uppercase;font-weight:600}
+.result-content{padding:1.5rem;max-height:600px;overflow-y:auto;color:#ccc;font-size:.88rem;line-height:1.8}
+.result-content::-webkit-scrollbar{width:4px}
+.result-content::-webkit-scrollbar-track{background:#111}
+.result-content::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
+.result-placeholder{color:#444;font-style:italic;text-align:center;padding:4rem 2rem}
+.result-placeholder .ph-icon{font-size:3rem;margin-bottom:1rem;opacity:.4}
+
+/* Streaming text */
+.stream-text h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;margin:1.2rem 0 .5rem;border-bottom:1px solid #1a1a1a;padding-bottom:.4rem}
+.stream-text h4{color:var(--teal-lt);font-size:.9rem;font-weight:600;margin:.8rem 0 .3rem}
+.stream-text p{margin-bottom:.7rem;color:#ccc}
+.stream-text ul{margin:.4rem 0 .8rem 1.2rem;color:#bbb}
+.stream-text li{margin-bottom:.3rem}
+.stream-text strong{color:#e8e8e8}
+.stream-text .good{color:#4ade80}
+.stream-text .warn{color:#fbbf24}
+.stream-text .bad{color:#f87171}
+.stream-text .badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:.72rem;font-weight:700;margin-left:.4rem;vertical-align:middle}
+.stream-text .badge-ok{background:rgba(74,222,128,.15);color:#4ade80;border:1px solid rgba(74,222,128,.3)}
+.stream-text .badge-warn{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
+.stream-text .badge-miss{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25)}
+.typing-cursor{display:inline-block;width:2px;height:1em;background:var(--gold);animation:blink .7s infinite;vertical-align:text-bottom;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Loading bar */
+.loading-bar{height:2px;background:var(--gold);width:0;transition:width .3s;border-radius:1px}
+
+/* ── ANALOGI ── */
+#analogi{background:var(--ink);color:white}
+#analogi .sec-tag{color:var(--gold-lt)}
+#analogi .sec-title{color:white}
+#analogi .sec-sub{color:#999}
+.analogi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem}
+.analogi-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:1.8rem;transition:background .2s}
+.analogi-card:hover{background:rgba(255,255,255,.07)}
+.analogi-emoji{font-size:2.2rem;margin-bottom:.8rem}
+.albl{font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:.4rem}
+.aterm{font-family:'Playfair Display',serif;font-size:1rem;color:white;margin-bottom:.6rem}
+.atxt{color:#999;font-size:.85rem;line-height:1.7}
+
+/* ── GLOSARIUM ── */
+#glosarium{background:var(--paper)}
+.gloss-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem}
+.gloss-item{background:white;border-radius:8px;padding:1.1rem 1.3rem;border:1px solid var(--border);display:flex;gap:.9rem;align-items:flex-start}
+.gloss-letter{width:32px;height:32px;border-radius:5px;background:var(--teal);color:white;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:.9rem;flex-shrink:0}
+.gloss-term{font-weight:600;font-size:.85rem;margin-bottom:2px}
+.gloss-def{color:var(--muted);font-size:.78rem;line-height:1.6}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);color:#555;text-align:center;padding:2rem;font-size:.8rem}
+footer span{color:var(--gold)}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s}
+.reveal.visible{opacity:1;transform:none}
+
+/* responsive */
+@media(max-width:768px){
+  .hero{grid-template-columns:1fr;padding-top:120px}
+  .hero-right{padding-left:0}
+  .analogi-grid,.gloss-grid{grid-template-columns:1fr}
+  .topic-panel.active{grid-template-columns:1fr}
+  .analyzer-layout{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .opt-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" onclick="showPage('learn')">PFM Academy</div>
+  <ul class="nav-links">
+    <li><a href="#coverage">Cakupan Materi</a></li>
+    <li><a href="#deepdive">Penjelasan Mendalam</a></li>
+    <li><a href="#analogi">Analogi</a></li>
+    <li><a href="#glosarium">Glosarium</a></li>
+  </ul>
+</nav>
+
+<div class="page-tabs">
+  <div class="page-tab active" onclick="showPage('learn')">📚 Belajar PFM</div>
+  <div class="page-tab" onclick="showPage('analyzer')">🤖 AI Model Analyzer</div>
+</div>
+
+<!-- ════════════════ PAGE: LEARN ════════════════ -->
+<div class="page active" id="page-learn">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="reveal">
+      <div class="hero-badge">Professional Financial Modeler · IFMI</div>
+      <h1>Keuangan Itu<br><span>Tidak Serumit</span><br>yang Kamu Kira</h1>
+      <p class="hero-desc">Panduan lengkap memahami kurikulum PFM — dari laporan keuangan, valuasi perusahaan, hingga analisis kredit — dalam bahasa sehari-hari yang mudah dicerna siapa pun.</p>
+      <button class="btn-primary" onclick="document.getElementById('coverage').scrollIntoView({behavior:'smooth'})">Mulai Belajar →</button>
+      <button class="btn-ghost" onclick="showPage('analyzer')">Coba AI Analyzer</button>
     </div>
-</section>
+    <div class="hero-right">
+      <div class="stat-card">
+        <div class="lbl">Model yang dipelajari</div>
+        <div class="val">Lambda Corp</div>
+        <div class="sub">Financial model standar PFM dengan 28 sheet terintegrasi</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">Topik yang dicakup</div>
+        <div class="val">7 Bagian Utama</div>
+        <div class="sub">Laporan keuangan → Valuasi → Analisis kredit</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">Fitur unggulan</div>
+        <div class="val">AI Analyzer</div>
+        <div class="sub">Upload Excel kamu → AI langsung menganalisis kelengkapannya</div>
+      </div>
+    </div>
+  </section>
 
-<!-- Add this to Navigation -->
+  <!-- STRIP -->
+  <div class="strip">
+    <div class="strip-item"><span class="dot"></span>Neraca · Laba Rugi · Arus Kas</div>
+    <div class="strip-item"><span class="dot"></span>Forecasting & Monte Carlo</div>
+    <div class="strip-item"><span class="dot"></span>Proyeksi Keuangan</div>
+    <div class="strip-item"><span class="dot"></span>DCF · EV · DDM · Residual Income</div>
+    <div class="strip-item"><span class="dot"></span>NPV · IRR · Payback</div>
+    <div class="strip-item"><span class="dot"></span>Sensitivity & Duration</div>
+    <div class="strip-item"><span class="dot"></span>CFADS · DSCR · Altman Z-Score</div>
+  </div>
+
+  <!-- COVERAGE CHECK -->
+  <section id="coverage">
+    <div class="reveal">
+      <div class="sec-tag">Cakupan Materi vs Model Lambda</div>
+      <h2 class="sec-title">Semua Topik PFM Ada<br>di Model Lambda Corp</h2>
+      <p class="sec-sub">Setiap bagian dari kurikulum PFM terwakili oleh sheet nyata dalam model Lambda Corporation. Klik untuk memahami apa yang ada di dalamnya.</p>
+    </div>
+    <div class="coverage-grid reveal">
+
+      <div class="cov-card c1">
+        <div class="cov-header">
+          <span class="cov-num">01</span>
+          <div><div class="cov-title">Akun & Laporan Keuangan</div><div class="cov-subtitle">Section I PFM BOK</div></div>
+        </div>
+        <div class="cov-body">
+          <ul class="cov-topics">
+            <li><span class="check">✓</span> Neraca (Balance Sheet) <span class="sheet">BS / BS Proforma</span></li>
+            <li><span class="check">✓</span> Laporan Laba Rugi <span class="sheet">IS / IS Proforma</span></li>
+            <li><span class="check">✓</span> Laporan Arus Kas <span class="sheet">CF</span></li>
+            <li><span class="check">✓</span> COGS & FX Gain/Loss <span class="sheet">COGS & FX GainLoss</span></li>
+            <li><span class="check">✓</span> Biaya Operasional <span class="sheet">OpCost</span></li>
+            <li><span class="check">✓</span> Aset Tetap & Depresiasi <span class="sheet">FixedAsset-Depr</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cov-card c2">
+        <div class="cov-header">
+          <span class="cov-num">02</span>
+          <div><div class="cov-title">Forecasting & Asumsi</div><div class="cov-subtitle">Section II PFM BOK</div></div>
+        </div>
+        <div class="cov-body">
+          <ul class="cov-topics">
+            <li><span class="check">✓</span> Data historis & tren harga <span class="sheet">Base&Hist</span></li>
+            <li><span class="check">✓</span> Asumsi volume growth <span class="sheet">Assumption</span></li>
+            <li><span class="check">✓</span> Analisis regresi harga <span class="sheet">Base&Hist</span></li>
+            <li><span class="check">✓</span> Inflasi & nilai tukar (FX) <span class="sheet">Assumption</span></li>
+            <li><span class="check">✓</span> Skenario best/base/worst <span class="sheet">Sensitivity</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cov-card c3">
+        <div class="cov-header">
+          <span class="cov-num">03</span>
+          <div><div class="cov-title">Proyeksi Keuangan</div><div class="cov-subtitle">Section III PFM BOK</div></div>
+        </div>
+        <div class="cov-body">
+          <ul class="cov-topics">
+            <li><span class="check">✓</span> Proyeksi revenue & COGS <span class="sheet">IS Proforma</span></li>
+            <li><span class="check">✓</span> Asumsi makro (suku bunga, inflasi) <span class="sheet">Assumption</span></li>
+            <li><span class="check">✓</span> Depresiasi multi-metode <span class="sheet">FixedAsset-Depr</span></li>
+            <li><span class="check">✓</span> Model pinjaman & IDC <span class="sheet">Debt · IDC</span></li>
+            <li><span class="check">✓</span> Modal kerja (WCM) <span class="sheet">WCM</span></li>
+            <li><span class="check">✓</span> Construction in Progress <span class="sheet">FixedAsset-Depr</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cov-card c4">
+        <div class="cov-header">
+          <span class="cov-num">04</span>
+          <div><div class="cov-title">Metode Valuasi</div><div class="cov-subtitle">Section IV PFM BOK</div></div>
+        </div>
+        <div class="cov-body">
+          <ul class="cov-topics">
+            <li><span class="check">✓</span> WACC & Beta calculation <span class="sheet">WACC</span></li>
+            <li><span class="check">✓</span> DCF – FCFF & FCFE <span class="sheet">DCF FCFF · DCF FCFE</span></li>
+            <li><span class="check">✓</span> Enterprise Value (EV) DCF <span class="sheet">EV DCF · EV Conversion</span></li>
+            <li><span class="check">✓</span> Dividend Discount Model <span class="sheet">DDM</span></li>
+            <li><span class="check">✓</span> Residual Income Model <span class="sheet">Residual Income</span></li>
+            <li><span class="check">✓</span> Price Multiples (P/E, P/BV) <span class="sheet">Price Mult</span></li>
+            <li><span class="check">✓</span> Market Value of Debt <span class="sheet">MV Debt</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cov-card c5">
+        <div class="cov-header">
+          <span class="cov-num">05</span>
+          <div><div class="cov-title">Model Proyek & Kelayakan</div><div class="cov-subtitle">Section V PFM BOK</div></div>
+        </div>
+        <div class="cov-body">
+          <ul class="cov-topics">
+            <li><span class="check">✓</span> Capex planning (proyek Antares) <span class="sheet">Assumption</span></li>
+            <li><span class="check">✓</span> NPV & IRR dari arus kas proyek <span class="sheet">DCF FCFF</span></li>
+            <li><span class="check">✓</span> Continuous expansion capex <span class="sheet">Assumption</span></li>
+            <li><span class="check">✓</span> Project loan drawdown schedule <span class="sheet">Debt</span></li>
+            <li><span class="check">✓</span> Sensitivity terhadap discount rate <span class="sheet">Sensitivity</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cov-card c6">
+        <div class="cov-header">
+          <span class="cov-num">06</span>
+          <div><div class="cov-title">Keberlanjutan & Risiko</div><div class="cov-subtitle">Section VI PFM BOK</div></div>
+        </div>
+        <div class="cov-body">
+          <ul class="cov-topics">
+            <li><span class="check">✓</span> Ratio Analysis (profitabilitas, likuiditas) <span class="sheet">Ratios</span></li>
+            <li><span class="check">✓</span> Common Size Analysis <span class="sheet">Common Size</span></li>
+            <li><span class="check">✓</span> Index Analysis <span class="sheet">Index Analysis</span></li>
+            <li><span class="check">✓</span> Sensitivity & Scenario Analysis <span class="sheet">Sensitivity</span></li>
+            <li><span class="check">✓</span> Delta Ratio (dalam Ratios) <span class="sheet">Ratios</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cov-card c7" style="grid-column:span 1">
+        <div class="cov-header">
+          <span class="cov-num">07</span>
+          <div><div class="cov-title">Analisis Kredit</div><div class="cov-subtitle">Section VII PFM BOK</div></div>
+        </div>
+        <div class="cov-body">
+          <ul class="cov-topics">
+            <li><span class="check">✓</span> CFADS calculation <span class="sheet">CFADS</span></li>
+            <li><span class="check">✓</span> DSCR & LLCR <span class="sheet">Credit Analysis</span></li>
+            <li><span class="check">✓</span> Altman Z-Score <span class="sheet">Altman</span></li>
+            <li><span class="check">✓</span> Cash flow credit analysis <span class="sheet">Credit Analysis</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- DEEP DIVE -->
+  <section id="deepdive">
+    <div class="reveal">
+      <div class="sec-tag">Penjelasan Mendalam</div>
+      <h2 class="sec-title">Pahami Setiap Bagian<br>dengan Mudah</h2>
+      <p class="sec-sub">Pilih topik yang ingin kamu pelajari. Setiap konsep dijelaskan lengkap dengan analogi kehidupan nyata.</p>
+    </div>
+    <div class="tabs-row">
+      <div class="dtab active" onclick="showTopic('t1',this)">Laporan Keuangan</div>
+      <div class="dtab" onclick="showTopic('t2',this)">Forecasting</div>
+      <div class="dtab" onclick="showTopic('t3',this)">Proyeksi & Asumsi</div>
+      <div class="dtab" onclick="showTopic('t4',this)">Valuasi</div>
+      <div class="dtab" onclick="showTopic('t5',this)">Proyek & NPV</div>
+      <div class="dtab" onclick="showTopic('t6',this)">Risiko & Sustainability</div>
+      <div class="dtab" onclick="showTopic('t7',this)">Analisis Kredit</div>
+    </div>
+
+    <div class="topic-panel active" id="t1">
+      <div class="topic-explain">
+        <h3>📊 Tiga Laporan Wajib Setiap Bisnis</h3>
+        <div class="explain-item">
+          <div class="term">Balance Sheet (Neraca)</div>
+          <div class="def">Snapshot kondisi keuangan di satu titik waktu. Menunjukkan apa yang dimiliki (aset) dan apa yang menjadi kewajiban (utang + modal).</div>
+          <div class="analogy">🏠 Ibarat foto rumahmu hari ini: rumah & mobil (aset) vs KPR & utang (kewajiban). Selisihnya = kekayaan bersihmu.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">Income Statement (Laba Rugi)</div>
+          <div class="def">Menunjukkan performa keuangan selama satu periode — apakah untung atau rugi. Revenue dikurangi semua biaya menghasilkan laba bersih.</div>
+          <div class="analogy">💰 Seperti catatan bulanan: gaji masuk Rp 10 juta, belanja + cicilan Rp 7 juta → sisa Rp 3 juta (laba kamu).</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">Cash Flow Statement (Arus Kas)</div>
+          <div class="def">Melacak pergerakan uang tunai sesungguhnya. Dibagi tiga: Operasi, Investasi, dan Pendanaan. Perusahaan bisa untung tapi kekurangan kas.</div>
+          <div class="analogy">🌊 Seperti aliran sungai — meski ada air banyak di hulu (aset), kalau alirannya tersumbat (piutang macet), hilir bisa kering.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">EBITDA</div>
+          <div class="def">Laba sebelum bunga, pajak, depresiasi, amortisasi. Proxy kasar kemampuan operasional menghasilkan kas — sebelum pengaruh struktur modal dan kebijakan akuntansi.</div>
+          <div class="analogy">🍰 Seperti pendapatan warung sebelum bayar sewa, listrik, dan pajak. Mengukur produktivitas "dapur" bisnis yang sebenarnya.</div>
+        </div>
+      </div>
+      <div class="topic-sheets">
+        <div class="sheets-title">Sheet dalam Model Lambda</div>
+        <div><span class="sheet-pill"><span class="icon">📋</span>BS – Balance Sheet historis</span><span class="sheet-pill"><span class="icon">📋</span>IS – Income Statement historis</span><span class="sheet-pill"><span class="icon">📋</span>BS Proforma – Proyeksi neraca</span><span class="sheet-pill"><span class="icon">📋</span>IS Proforma – Proyeksi laba rugi</span><span class="sheet-pill"><span class="icon">📋</span>CF – Cash Flow Statement</span><span class="sheet-pill"><span class="icon">📋</span>COGS & FX GainLoss</span><span class="sheet-pill"><span class="icon">📋</span>OpCost – Biaya operasional</span></div>
+        <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #222">
+          <div class="sheets-title">Rumus Kunci</div>
+          <div style="background:#111;border-radius:6px;padding:1rem;font-family:monospace;font-size:.78rem;color:#ccc;margin-top:.5rem">
+            <div style="color:#888;margin-bottom:.5rem">// Persamaan Akuntansi</div>
+            <div style="color:#4ade80">Aset = Kewajiban + Ekuitas</div>
+            <div style="color:#888;margin:.5rem 0">// Laba Bersih</div>
+            <div style="color:#fbbf24">Net Income = Revenue − COGS − OpCost − Interest − Tax</div>
+            <div style="color:#888;margin:.5rem 0">// EBITDA</div>
+            <div style="color:#60a5fa">EBITDA = Operating Profit + Depreciation</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-panel" id="t2">
+      <div class="topic-explain">
+        <h3>🔮 Memprediksi Masa Depan dengan Data</h3>
+        <div class="explain-item">
+          <div class="term">Trend Analysis (Analisis Tren)</div>
+          <div class="def">Menggunakan data historis untuk menemukan pola dan memproyeksikan ke depan. Bisa linear, polinomial, atau eksponensial tergantung pola datanya.</div>
+          <div class="analogy">📈 Seperti melihat jadwal pertumbuhan tinggi badan anak — kalau 5 tahun terakhir naik 6 cm/tahun, perkiraan tahun depan ya sekitar 6 cm juga.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">Regression Analysis</div>
+          <div class="def">Menemukan hubungan statistik antara dua atau lebih variabel. Berguna untuk memprediksi satu variabel berdasarkan variabel lain yang berhubungan.</div>
+          <div class="analogy">🔗 "Kalau harga bensin naik 10%, biaya distribusi saya naik sekitar 4%." — Itu adalah insight dari regresi.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">Monte Carlo Simulation</div>
+          <div class="def">Mensimulasikan ribuan skenario acak berdasarkan distribusi probabilitas untuk mengukur rentang kemungkinan hasil. Menghasilkan distribusi kemungkinan, bukan satu angka pasti.</div>
+          <div class="analogy">🎲 Seperti melempar dadu 10.000 kali dan mencatat hasilnya — dari situ kamu tahu berapa % kemungkinan dapat angka 6.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">Autoregressive Method</div>
+          <div class="def">Model yang memprediksi nilai sekarang berdasarkan nilai-nilai masa lalunya sendiri. AR(4) berarti menggunakan 4 periode sebelumnya.</div>
+          <div class="analogy">🔄 "Penjualan bulan ini cenderung mengikuti pola bulan yang sama tahun-tahun sebelumnya." — Itu prinsip autoregressive.</div>
+        </div>
+      </div>
+      <div class="topic-sheets">
+        <div class="sheets-title">Sheet dalam Model Lambda</div>
+        <div><span class="sheet-pill"><span class="icon">📊</span>Base&Hist – Data historis harga & volume</span><span class="sheet-pill"><span class="icon">📊</span>Assumption – Asumsi growth & macro</span><span class="sheet-pill"><span class="icon">📊</span>Sensitivity – Scenario analysis</span></div>
+        <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #222">
+          <div class="sheets-title">Lambda Corp: Volume Growth Assumption</div>
+          <div style="background:#111;border-radius:6px;padding:1rem;font-family:monospace;font-size:.78rem;color:#ccc;margin-top:.5rem">
+            <div style="color:#888">// Dari sheet Assumption Lambda Corp</div>
+            <div style="color:#4ade80">Volume Growth: 2.25% (2017E) → 2% (2018E dst)</div>
+            <div style="color:#fbbf24">Price Product A: Rp 5,637 → Rp 7,554 (tren linear)</div>
+            <div style="color:#60a5fa">Inflasi: 4.8% konstan selama proyeksi</div>
+            <div style="color:#f87171">FX USD/IDR: 12,291 → 25,374 (tren naik)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-panel" id="t3">
+      <div class="topic-explain">
+        <h3>🏗️ Membangun Proyeksi Keuangan Lengkap</h3>
+        <div class="explain-item">
+          <div class="term">Modal Kerja (Working Capital)</div>
+          <div class="def">Dana yang dibutuhkan untuk operasi harian sebelum pembayaran dari pelanggan masuk. Dihitung dari Days of Receivables, Inventory, dan Payables.</div>
+          <div class="analogy">💼 Kamu perlu beli bahan baku dulu sebelum produk terjual. Jarak antara "bayar supplier" dan "terima bayaran dari customer" = kebutuhan modal kerja.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">Depresiasi (Depreciation)</div>
+          <div class="def">Penurunan nilai aset tetap dari waktu ke waktu yang dicatat sebagai biaya. Metode: straight-line, declining balance, units of production.</div>
+          <div class="analogy">🚗 Mobil baru dibeli Rp 200 juta, pakai 10 tahun. Tiap tahun nilainya turun Rp 20 juta (straight-line). Penurunan itu dicatat sebagai "biaya depresiasi".</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">IDC (Interest During Construction)</div>
+          <div class="def">Bunga pinjaman yang dikapitalisasi selama masa konstruksi proyek — sebelum aset mulai beroperasi dan menghasilkan pendapatan.</div>
+          <div class="analogy">🏗️ Seperti bunga KPR yang menumpuk selama rumah masih dibangun. Bunga itu menjadi bagian dari "harga" rumah, bukan biaya langsung.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">FX Gain/Loss</div>
+          <div class="def">Keuntungan atau kerugian akibat perubahan nilai tukar mata uang asing pada item-item neraca yang denominasi dalam valuta asing.</div>
+          <div class="analogy">💱 Kamu punya utang dolar $1M saat kurs Rp 14.000. Kurs naik jadi Rp 15.000 → utang rupiahmu naik Rp 1 miliar tiba-tiba. Itu FX Loss.</div>
+        </div>
+      </div>
+      <div class="topic-sheets">
+        <div class="sheets-title">Sheet dalam Model Lambda</div>
+        <div><span class="sheet-pill"><span class="icon">⚙️</span>WCM – Working Capital Model</span><span class="sheet-pill"><span class="icon">⚙️</span>FixedAsset-Depr</span><span class="sheet-pill"><span class="icon">⚙️</span>Debt – Loan schedule</span><span class="sheet-pill"><span class="icon">⚙️</span>IDC – Interest During Construction</span><span class="sheet-pill"><span class="icon">⚙️</span>COGS & FX GainLoss</span></div>
+        <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #222">
+          <div class="sheets-title">Lambda Corp: Proyek Antares</div>
+          <div style="background:#111;border-radius:6px;padding:1rem;font-family:monospace;font-size:.78rem;color:#ccc;margin-top:.5rem">
+            <div style="color:#888">// Konstruksi 3 tahun (CIP)</div>
+            <div style="color:#4ade80">CIP 2017: Rp 500.000 juta</div>
+            <div style="color:#4ade80">CIP 2018: Rp 750.000 juta (+250rb)</div>
+            <div style="color:#fbbf24">Completed 2019: Rp 1.000.000 juta</div>
+            <div style="color:#888;margin-top:.4rem">// Loan 70% dari project cost</div>
+            <div style="color:#60a5fa">Project Loan: 350rb → 525rb → 700rb juta</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-panel" id="t4">
+      <div class="topic-explain">
+        <h3>💰 Berapa Nilai Sebenarnya Perusahaan Ini?</h3>
+        <div class="explain-item">
+          <div class="term">WACC (Weighted Average Cost of Capital)</div>
+          <div class="def">Biaya modal rata-rata tertimbang dari semua sumber pendanaan (utang + ekuitas). Ini adalah tingkat pengembalian minimum yang harus dihasilkan bisnis untuk memuaskan semua penyandang dana.</div>
+          <div class="analogy">🎯 Jika bank memberikan pinjaman dengan bunga 8% dan investor saham mengharapkan return 12%, dan porsinya 50:50, WACC = 10%. Bisnis harus bisa menghasilkan di atas 10% agar menciptakan nilai.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">DCF (Discounted Cash Flow)</div>
+          <div class="def">Menghitung nilai sekarang dari proyeksi arus kas bebas masa depan, didiskon dengan WACC. Nilai terminal ditambahkan untuk menangkap nilai setelah periode proyeksi.</div>
+          <div class="analogy">🌳 Kamu punya pohon duren yang menghasilkan Rp 10 juta/tahun selama 10 tahun. Dengan tingkat diskon 10%, nilai pohon itu hari ini = Rp 61,4 juta (bukan Rp 100 juta).</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">Enterprise Value vs Equity Value</div>
+          <div class="def">EV = nilai total perusahaan (untuk semua penyandang dana). Equity Value = EV dikurangi utang bersih = nilai untuk pemegang saham saja.</div>
+          <div class="analogy">🏠 Rumah seharga Rp 1 miliar (EV). Masih ada KPR Rp 400 juta. Nilai murni untukmu (equity) = Rp 600 juta.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">Price Multiples (P/E, EV/EBITDA)</div>
+          <div class="def">Valuasi relatif dengan membandingkan harga vs metrik keuangan. Berguna untuk membandingkan antar perusahaan sejenis di industri yang sama.</div>
+          <div class="analogy">📊 P/E = 15x artinya investor mau bayar 15× laba tahunan. Jika rata-rata industri 20x, saham ini terlihat "murah" secara relatif.</div>
+        </div>
+      </div>
+      <div class="topic-sheets">
+        <div class="sheets-title">Sheet dalam Model Lambda</div>
+        <div><span class="sheet-pill"><span class="icon">💹</span>WACC</span><span class="sheet-pill"><span class="icon">💹</span>DCF FCFF</span><span class="sheet-pill"><span class="icon">💹</span>DCF FCFE</span><span class="sheet-pill"><span class="icon">💹</span>EV DCF</span><span class="sheet-pill"><span class="icon">💹</span>EV Conversion</span><span class="sheet-pill"><span class="icon">💹</span>DDM</span><span class="sheet-pill"><span class="icon">💹</span>Residual Income</span><span class="sheet-pill"><span class="icon">💹</span>Price Mult</span><span class="sheet-pill"><span class="icon">💹</span>MV Debt</span></div>
+        <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #222">
+          <div class="sheets-title">Lambda Corp: WACC Calculation</div>
+          <div style="background:#111;border-radius:6px;padding:1rem;font-family:monospace;font-size:.78rem;color:#ccc;margin-top:.5rem">
+            <div style="color:#888">// Beta dari data historis harga saham</div>
+            <div style="color:#4ade80">Beta (Levered): 1.175</div>
+            <div style="color:#fbbf24">Cost of Equity (CAPM): Rf + β×(Rm−Rf)</div>
+            <div style="color:#60a5fa">Cost of Debt (after-tax): 7.5%</div>
+            <div style="color:#f87171">Rm (market return): ~15.1%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-panel" id="t5">
+      <div class="topic-explain">
+        <h3>🏗️ Apakah Proyek Ini Layak Dijalankan?</h3>
+        <div class="explain-item">
+          <div class="term">NPV (Net Present Value)</div>
+          <div class="def">Nilai sekarang bersih dari semua arus kas proyek dikurangi investasi awal. NPV > 0 = proyek menciptakan nilai. NPV < 0 = lebih baik tidak dilakukan.</div>
+          <div class="analogy">🌰 Kamu invest Rp 100 juta untuk buka kafe. NPV = nilai sekarang dari semua keuntungan kafe selama 5 tahun − Rp 100 juta. Kalau hasilnya +Rp 25 juta, proyek ini menguntungkan.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">IRR (Internal Rate of Return)</div>
+          <div class="def">Tingkat diskonto di mana NPV = 0. Jika IRR > WACC, proyek menciptakan nilai. Merupakan "rate of return" internal yang dihasilkan proyek.</div>
+          <div class="analogy">💡 IRR 15% artinya proyek ini ibarat "deposito" yang memberikan bunga 15% setahun. Jika biaya modal kamu 10%, ini bagus.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">Kelemahan NPV & IRR</div>
+          <div class="def">NPV tidak adil membandingkan proyek berskala berbeda. IRR bisa keliru (Multiple IRR) jika arus kas berganti tanda lebih dari sekali. Modified IRR (MIRR) mengatasi masalah ini.</div>
+          <div class="analogy">⚠️ NPV proyek besar selalu tampak lebih bagus dari proyek kecil meski return per rupiahnya lebih rendah. Gunakan Profitability Index (PI) untuk perbandingan yang adil.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">NPV Profile & Crossover</div>
+          <div class="def">Grafik NPV vs tingkat diskonto. Dua proyek yang "bersilang" di satu titik (crossover rate) bisa memiliki peringkat berbeda tergantung biaya modal yang digunakan.</div>
+          <div class="analogy">📉 Seperti dua jalur investasi yang masing-masing lebih unggul di kondisi berbeda. Proyek A lebih baik saat bunga rendah; Proyek B lebih baik saat bunga tinggi.</div>
+        </div>
+      </div>
+      <div class="topic-sheets">
+        <div class="sheets-title">Sheet dalam Model Lambda (terkait proyek)</div>
+        <div><span class="sheet-pill"><span class="icon">🔨</span>DCF FCFF – Project feasibility</span><span class="sheet-pill"><span class="icon">🔨</span>Sensitivity – NPV sensitivity</span><span class="sheet-pill"><span class="icon">🔨</span>Assumption – Capex & loan schedule</span><span class="sheet-pill"><span class="icon">🔨</span>Debt – Project loan tranche</span></div>
+      </div>
+    </div>
+
+    <div class="topic-panel" id="t6">
+      <div class="topic-explain">
+        <h3>⚖️ Seberapa Berisiko Model Ini?</h3>
+        <div class="explain-item">
+          <div class="term">Common Size Analysis</div>
+          <div class="def">Menyajikan semua item laporan keuangan sebagai persentase dari satu angka dasar (biasanya revenue untuk IS, atau total aset untuk BS). Memudahkan perbandingan antar perusahaan atau antar tahun.</div>
+          <div class="analogy">📐 Seperti mengukur proporsi bahan makanan dalam resep — bukan dalam gram, tapi dalam %. Resep mana yang "lebih banyak gula"? Mudah terlihat.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">Sensitivity Analysis & Duration</div>
+          <div class="def">Mengukur seberapa sensitif nilai ekuitas terhadap perubahan satu asumsi (Equity Duration). Faktor dengan durasi tertinggi = risiko terbesar dalam model.</div>
+          <div class="analogy">🎚️ Seperti panel mixing music — Equity Duration menunjukkan "volume knob" mana yang paling kuat mempengaruhi suara akhir. Naik-turunkan satu, lihat output-nya berubah berapa.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">DuPont Analysis</div>
+          <div class="def">Memecah ROE (Return on Equity) menjadi tiga komponen: Net Margin × Asset Turnover × Financial Leverage. Mengidentifikasi sumber profitabilitas bisnis.</div>
+          <div class="analogy">🔍 ROE tinggi bisa berasal dari: margin produk yang bagus, efisiensi penggunaan aset, atau agresivitas utang. DuPont memisahkan ketiganya.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">Ratio Analysis</div>
+          <div class="def">Profitabilitas (ROE, ROA, Net Margin), Likuiditas (Current Ratio, Quick Ratio), Solvabilitas (D/E, Interest Coverage), Aktivitas (Asset Turnover, Days Sales).</div>
+          <div class="analogy">🩺 Seperti hasil cek kesehatan tahunan — tekanan darah, gula darah, kolesterol. Masing-masing mengindikasikan aspek kesehatan yang berbeda.</div>
+        </div>
+      </div>
+      <div class="topic-sheets">
+        <div class="sheets-title">Sheet dalam Model Lambda</div>
+        <div><span class="sheet-pill"><span class="icon">📈</span>Ratios – Full ratio analysis</span><span class="sheet-pill"><span class="icon">📈</span>Common Size</span><span class="sheet-pill"><span class="icon">📈</span>Index Analysis</span><span class="sheet-pill"><span class="icon">📈</span>Sensitivity – Scenario analysis</span></div>
+      </div>
+    </div>
+
+    <div class="topic-panel" id="t7">
+      <div class="topic-explain">
+        <h3>🏦 Layak Dapat Pinjaman atau Tidak?</h3>
+        <div class="explain-item">
+          <div class="term">CFADS (Cash Flow Available for Debt Service)</div>
+          <div class="def">Arus kas bersih yang benar-benar tersedia untuk membayar cicilan utang (pokok + bunga). Berbeda dari EBITDA karena memperhitungkan kebutuhan kas operasional nyata.</div>
+          <div class="analogy">💧 Dari gaji Rp 20 juta, setelah kebutuhan hidup Rp 12 juta, yang bisa buat cicilan = Rp 8 juta. Itulah CFADS-mu. Bukan gaji kotor, bukan EBITDA.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">DSCR (Debt Service Coverage Ratio)</div>
+          <div class="def">CFADS ÷ Total Kewajiban Cicilan Utang (pokok + bunga) dalam periode yang sama. DSCR minimum yang umum disyaratkan bank: 1.2x – 1.5x.</div>
+          <div class="analogy">💳 Gaji bersih Rp 8 juta, cicilan Rp 5 juta. DSCR = 1.6x. Bank senang. Kalau cicilannya Rp 8.5 juta → DSCR 0.94x → kredit ditolak.</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">LLCR (Loan Life Coverage Ratio)</div>
+          <div class="def">NPV dari seluruh CFADS selama sisa masa pinjaman dibagi saldo utang saat ini. Memberikan gambaran coverage jangka panjang, bukan hanya satu periode.</div>
+          <div class="analogy">📅 Bayangkan kamu tidak hanya cek "bulan ini bisa bayar tidak" tapi "selama sisa KPR 15 tahun, total kemampuan bayarku berapa dibanding saldo utang".</div>
+        </div>
+        <div class="explain-item">
+          <div class="term">Altman Z-Score</div>
+          <div class="def">Formula yang menggabungkan 5 rasio keuangan untuk memprediksi probabilitas kebangkrutan. Z > 2.99 = aman, 1.81 – 2.99 = zona abu-abu, Z < 1.81 = berisiko tinggi.</div>
+          <div class="analogy">🩻 Seperti skor kredit — satu angka yang merangkum kesehatan finansial perusahaan. Bank dan investor menggunakannya sebagai filter awal sebelum analisis mendalam.</div>
+        </div>
+      </div>
+      <div class="topic-sheets">
+        <div class="sheets-title">Sheet dalam Model Lambda</div>
+        <div><span class="sheet-pill"><span class="icon">🏦</span>CFADS</span><span class="sheet-pill"><span class="icon">🏦</span>Credit Analysis</span><span class="sheet-pill"><span class="icon">🏦</span>Altman – Z-Score</span></div>
+        <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #222">
+          <div class="sheets-title">Rumus DSCR</div>
+          <div style="background:#111;border-radius:6px;padding:1rem;font-family:monospace;font-size:.78rem;color:#ccc;margin-top:.5rem">
+            <div style="color:#4ade80">DSCR = CFADS / (Principal + Interest)</div>
+            <div style="color:#888;margin:.5rem 0">// Target DSCR bank umumnya:</div>
+            <div style="color:#fbbf24">Proyek infrastruktur: ≥ 1.3x</div>
+            <div style="color:#fbbf24">Korporasi umum: ≥ 1.2x</div>
+            <div style="color:#f87171">Di bawah 1.0x = tidak bisa bayar utang</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANALOGI -->
+  <section id="analogi">
+    <div class="reveal">
+      <div class="sec-tag">Bahasa Sehari-hari</div>
+      <h2 class="sec-title">Konsep Sulit,<br>Penjelasan Mudah</h2>
+      <p class="sec-sub">Semua istilah keuangan pada dasarnya menjawab pertanyaan sederhana yang kamu hadapi sehari-hari.</p>
+    </div>
+    <div class="analogi-grid reveal">
+      <div class="analogi-card"><div class="analogi-emoji">🏪</div><div class="albl">Balance Sheet</div><div class="aterm">Neraca Keuangan</div><div class="atxt">Seperti foto kondisi keuanganmu hari ini: harta di kiri, utang + modal di kanan. Keduanya selalu seimbang karena setiap harta selalu ada sumbernya.</div></div>
+      <div class="analogi-card"><div class="analogi-emoji">🌊</div><div class="albl">Cash Flow</div><div class="aterm">Nafas Kehidupan Bisnis</div><div class="atxt">Perusahaan bisa tampak untung tapi mati kehabisan kas. Seperti orang yang punya rumah mewah tapi tidak bisa bayar tagihan listrik bulan ini.</div></div>
+      <div class="analogi-card"><div class="analogi-emoji">🌳</div><div class="albl">DCF Valuation</div><div class="aterm">Nilai Pohon dari Buahnya</div><div class="atxt">Harga pohon durian yang berbuah Rp 10 juta/tahun selama 10 tahun tidak sama dengan Rp 100 juta, karena uang di masa depan nilainya lebih rendah dari hari ini.</div></div>
+      <div class="analogi-card"><div class="analogi-emoji">🎯</div><div class="albl">WACC</div><div class="aterm">Target Bunga yang Harus Dikalahkan</div><div class="atxt">Kalau pinjaman bankmu 8% dan investor saham minta 12%, rata-ratanya 10%. Bisnis harus bisa menghasilkan di atas 10% agar semua pihak terpuaskan.</div></div>
+      <div class="analogi-card"><div class="analogi-emoji">🏦</div><div class="albl">DSCR</div><div class="aterm">Kemampuan Bayar Cicilan</div><div class="atxt">Gajimu Rp 10 juta, cicilan utang Rp 5 juta. DSCR = 2.0x. Bank suka angka ini di atas 1.2x sebelum kasih kredit bisnis.</div></div>
+      <div class="analogi-card"><div class="analogi-emoji">🩻</div><div class="albl">Altman Z-Score</div><div class="aterm">Skor Kesehatan Perusahaan</div><div class="atxt">Seperti hasil lab medis yang merangkum kesehatan seseorang jadi satu angka. Z &gt; 2.99 = sehat. Z &lt; 1.81 = lampu merah, waspadai kebangkrutan.</div></div>
+    </div>
+  </section>
+
+  <!-- GLOSARIUM -->
+  <section id="glosarium">
+    <div class="reveal">
+      <div class="sec-tag">Referensi Cepat</div>
+      <h2 class="sec-title">Glosarium Istilah PFM</h2>
+      <p class="sec-sub">Kamus singkat 15 istilah kunci yang wajib kamu hafal.</p>
+    </div>
+    <div class="gloss-grid reveal">
+      <div class="gloss-item"><div class="gloss-letter">A</div><div><div class="gloss-term">Aset (Asset)</div><div class="gloss-def">Semua yang dimiliki perusahaan dan memiliki nilai ekonomi: kas, piutang, inventaris, mesin, gedung.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">C</div><div><div class="gloss-term">CFADS</div><div class="gloss-def">Cash Flow Available for Debt Service. Kas bersih yang tersedia untuk bayar utang setelah semua kebutuhan operasional.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">C</div><div><div class="gloss-term">COGS</div><div class="gloss-def">Cost of Goods Sold. Biaya langsung produksi/pembelian barang yang dijual. Belum termasuk biaya overhead umum.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">D</div><div><div class="gloss-term">DCF</div><div class="gloss-def">Discounted Cash Flow. Menghitung nilai sekarang dari proyeksi arus kas masa depan menggunakan tingkat diskonto.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">D</div><div><div class="gloss-term">DSCR</div><div class="gloss-def">Debt Service Coverage Ratio. CFADS ÷ cicilan utang. Ukuran kemampuan bayar utang; bank umumnya mensyaratkan ≥ 1.2x.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">E</div><div><div class="gloss-term">EBITDA</div><div class="gloss-def">Laba sebelum bunga, pajak, depresiasi, amortisasi. Proxy kemampuan operasional menghasilkan kas.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">E</div><div><div class="gloss-term">Enterprise Value</div><div class="gloss-def">Total nilai perusahaan = Market Cap + Utang Bersih. Nilai dari perspektif semua penyandang dana.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">F</div><div><div class="gloss-term">FCFF</div><div class="gloss-def">Free Cash Flow to Firm. Arus kas bebas untuk semua penyandang dana (utang + ekuitas) setelah capex.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">F</div><div><div class="gloss-term">FCFE</div><div class="gloss-def">Free Cash Flow to Equity. Arus kas yang tersisa untuk pemegang saham setelah membayar semua kewajiban utang.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">I</div><div><div class="gloss-term">IRR</div><div class="gloss-def">Internal Rate of Return. Tingkat diskonto di mana NPV = 0. Jika IRR > WACC, proyek menciptakan nilai.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">L</div><div><div class="gloss-term">LLCR</div><div class="gloss-def">Loan Life Coverage Ratio. NPV CFADS selama sisa masa pinjaman ÷ saldo utang. Ukuran kelayakan kredit jangka panjang.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">N</div><div><div class="gloss-term">NPV</div><div class="gloss-def">Net Present Value. Nilai sekarang arus kas masuk dikurangi investasi awal. NPV positif = proyek menguntungkan.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">W</div><div><div class="gloss-term">WACC</div><div class="gloss-def">Weighted Average Cost of Capital. Biaya modal rata-rata tertimbang — hurdle rate minimum yang harus dihasilkan bisnis.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">W</div><div><div class="gloss-term">Working Capital</div><div class="gloss-def">Modal kerja = Aset Lancar − Kewajiban Lancar. Dana yang diperlukan untuk operasi harian bisnis.</div></div></div>
+      <div class="gloss-item"><div class="gloss-letter">Z</div><div><div class="gloss-term">Altman Z-Score</div><div class="gloss-def">Formula prediksi kebangkrutan dari 5 rasio keuangan. Z > 2.99 aman, Z < 1.81 berisiko tinggi.</div></div></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Berdasarkan kurikulum <span>PFM Body of Knowledge</span> oleh International Financial Modeling Institute (IFMI) · Model Lambda Corporation 2021</p>
+    <p style="margin-top:.4rem">Konten ini untuk tujuan edukasi. © 2026 PFM Academy</p>
+  </footer>
+
+</div><!-- end page-learn -->
+
+<!-- ════════════════ PAGE: ANALYZER ════════════════ -->
+<div class="page" id="page-analyzer">
+<section id="analyzer">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="reveal">
+      <div class="sec-tag">AI-Powered · Powered by Claude</div>
+      <h2 class="sec-title">Financial Model Analyzer</h2>
+      <p class="sec-sub">Upload file Excel model keuanganmu. AI akan menganalisis kelengkapannya berdasarkan standar PFM, menemukan gap, dan memberikan saran konkret — dalam hitungan detik.</p>
+    </div>
+
+    <div class="analyzer-layout">
+      <!-- LEFT: Controls -->
+      <div>
+        <!-- Upload -->
+        <div class="upload-zone" id="uploadZone" ondragover="handleDrag(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+          <input type="file" class="upload-input" id="fileInput" accept=".xlsx,.xls,.csv" onchange="handleFile(event)">
+          <div class="upload-icon">📊</div>
+          <div class="upload-title">Drop file Excel di sini</div>
+          <div class="upload-sub">atau klik untuk pilih file · .xlsx, .xls, .csv</div>
+        </div>
+
+        <div id="fileInfo" style="display:none">
+          <div class="file-info">
+            <div class="fname" id="fileName">—</div>
+            <div class="fmeta" id="fileMeta">—</div>
+          </div>
+          <div class="sheet-selector" id="sheetSelector" style="display:none">
+            <label>Sheet yang terdeteksi:</label>
+            <div class="sheet-chips" id="sheetChips"></div>
+          </div>
+        </div>
+
+        <!-- Analysis type -->
+        <div class="analysis-opts" id="analysisOpts" style="display:none">
+          <div class="opt-title">Jenis Analisis</div>
+          <div class="opt-grid">
+            <div class="opt-btn active" onclick="toggleOpt(this)" data-opt="completeness">✅ Kelengkapan PFM</div>
+            <div class="opt-btn active" onclick="toggleOpt(this)" data-opt="structure">🏗️ Struktur Model</div>
+            <div class="opt-btn" onclick="toggleOpt(this)" data-opt="assumptions">🎯 Kualitas Asumsi</div>
+            <div class="opt-btn" onclick="toggleOpt(this)" data-opt="valuation">💰 Kelengkapan Valuasi</div>
+            <div class="opt-btn" onclick="toggleOpt(this)" data-opt="credit">🏦 Analisis Kredit</div>
+            <div class="opt-btn" onclick="toggleOpt(this)" data-opt="risk">⚠️ Identifikasi Risiko</div>
+          </div>
+        </div>
+
+        <button class="analyze-btn" id="analyzeBtn" disabled onclick="analyzeModel()">
+          🤖 Analisis dengan AI
+        </button>
+
+        <!-- Quick example -->
+        <div style="margin-top:1.2rem;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:1.2rem">
+          <div style="color:var(--gold);font-size:.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:.6rem">💡 Coba dengan model Lambda Corp</div>
+          <p style="color:#888;font-size:.8rem;line-height:1.6">File yang kamu upload sebelumnya (Lambda Corporation 2021) adalah model PFM standar yang sangat lengkap. Upload file tersebut untuk melihat analisis AI secara langsung.</p>
+          <button onclick="loadLambdaDemo()" style="margin-top:.8rem;padding:7px 16px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold);border-radius:4px;font-size:.78rem;cursor:pointer;font-weight:600">Lihat Demo Analisis →</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: Result -->
+      <div>
+        <div class="result-panel">
+          <div class="result-header">
+            <div class="result-dot" id="statusDot"></div>
+            <div class="result-dot" id="statusDot2"></div>
+            <div class="result-dot" id="statusDot3"></div>
+            <div class="result-title" id="resultTitle">Menunggu file...</div>
+            <div style="margin-left:auto;height:2px;width:80px;background:#111;border-radius:1px;overflow:hidden"><div class="loading-bar" id="loadingBar"></div></div>
+          </div>
+          <div class="result-content" id="resultContent">
+            <div class="result-placeholder">
+              <div class="ph-icon">🤖</div>
+              <p>Upload file Excel model keuanganmu, lalu klik "Analisis dengan AI"</p>
+              <p style="font-size:.78rem;margin-top:.5rem;color:#333">AI akan membaca struktur sheet, data asumsi, dan kelengkapan komponen berdasarkan standar PFM IFMI</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div><!-- end page-analyzer -->
+
 <script>
-    // Add navigation item for model analyzer if not exists
-    document.addEventListener('DOMContentLoaded', function() {
-        const navMenu = document.querySelector('.nav-menu');
-        if (navMenu) {
-            const modelLink = document.createElement('li');
-            modelLink.innerHTML = '<a href="#model-analyzer">Model Analyzer</a>';
-            navMenu.appendChild(modelLink);
-        }
+// ── PAGE TABS ──
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.page-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  const idx = p === 'learn' ? 0 : 1;
+  document.querySelectorAll('.page-tab')[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── DEEP DIVE TABS ──
+function showTopic(id, el) {
+  document.querySelectorAll('.topic-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.dtab').forEach(d => d.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── SCROLL REVEAL ──
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// ── FILE UPLOAD ──
+let workbookData = null;
+let selectedSheets = [];
+let activeOpts = ['completeness', 'structure'];
+
+function handleDrag(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('dragover'); }
+function handleDragLeave(e) { document.getElementById('uploadZone').classList.remove('dragover'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+}
+
+function processFile(file) {
+  const zone = document.getElementById('uploadZone');
+  zone.classList.add('has-file');
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileMeta').textContent = `${(file.size/1024).toFixed(1)} KB · ${new Date(file.lastModified).toLocaleDateString('id')}`;
+  document.getElementById('fileInfo').style.display = 'block';
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array', sheetStubs: true });
+      workbookData = { wb, fileName: file.name, fileSize: file.size };
+
+      // Show sheets
+      const chips = document.getElementById('sheetChips');
+      chips.innerHTML = '';
+      selectedSheets = [];
+      wb.SheetNames.slice(0, 20).forEach(name => {
+        if (name.startsWith('__')) return;
+        const chip = document.createElement('div');
+        chip.className = 'sheet-chip active';
+        chip.textContent = name;
+        chip.onclick = () => {
+          chip.classList.toggle('active');
+          if (chip.classList.contains('active')) selectedSheets.push(name);
+          else selectedSheets = selectedSheets.filter(s => s !== name);
+        };
+        chips.appendChild(chip);
+        selectedSheets.push(name);
+      });
+      document.getElementById('sheetSelector').style.display = 'block';
+      document.getElementById('analysisOpts').style.display = 'block';
+      document.getElementById('analyzeBtn').disabled = false;
+      document.getElementById('resultTitle').textContent = 'File siap dianalisis';
+      document.getElementById('statusDot').classList.add('yellow');
+    } catch(err) {
+      document.getElementById('resultContent').innerHTML = `<p style="color:#f87171">❌ Gagal membaca file: ${err.message}</p>`;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function toggleOpt(el) {
+  el.classList.toggle('active');
+  const opt = el.dataset.opt;
+  if (el.classList.contains('active')) activeOpts.push(opt);
+  else activeOpts = activeOpts.filter(o => o !== opt);
+}
+
+// ── EXTRACT SHEET DATA ──
+function extractSheetData(wb, sheetName, maxRows = 30) {
+  const ws = wb.Sheets[sheetName];
+  if (!ws) return '';
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+  return rows.slice(0, maxRows)
+    .map(r => r.filter(c => c !== '').join('\t'))
+    .filter(r => r.trim())
+    .join('\n');
+}
+
+// ── ANALYZE ──
+async function analyzeModel() {
+  if (!workbookData) return;
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Menganalisis...';
+  document.getElementById('resultTitle').textContent = 'AI sedang menganalisis...';
+  document.getElementById('statusDot').className = 'result-dot yellow';
+  document.getElementById('loadingBar').style.width = '0%';
+  document.getElementById('resultContent').innerHTML = '<div style="color:#555;font-style:italic">🤖 Membaca struktur model...</div>';
+
+  // Animate loading bar
+  let prog = 0;
+  const loadTimer = setInterval(() => {
+    prog = Math.min(prog + Math.random() * 8, 85);
+    document.getElementById('loadingBar').style.width = prog + '%';
+  }, 300);
+
+  // Build context from sheets
+  const wb = workbookData.wb;
+  const allSheets = wb.SheetNames.filter(s => !s.startsWith('__'));
+  const sampledSheets = selectedSheets.length > 0 ? selectedSheets.slice(0, 12) : allSheets.slice(0, 12);
+
+  let sheetSummary = `Nama file: ${workbookData.fileName}\nTotal sheet: ${allSheets.length}\nDaftar semua sheet: ${allSheets.join(', ')}\n\n`;
+  sheetSummary += `=== SAMPLE DATA PER SHEET ===\n`;
+
+  for (const name of sampledSheets.slice(0, 8)) {
+    const data = extractSheetData(wb, name, 20);
+    if (data.length > 10) {
+      sheetSummary += `\n--- ${name} ---\n${data.slice(0, 800)}\n`;
+    }
+  }
+
+  const optsLabel = activeOpts.map(o => ({
+    completeness: 'Kelengkapan komponen PFM',
+    structure: 'Struktur dan organisasi model',
+    assumptions: 'Kualitas dan kedalaman asumsi',
+    valuation: 'Kelengkapan metode valuasi',
+    credit: 'Kelengkapan analisis kredit',
+    risk: 'Identifikasi potensi risiko model'
+  }[o])).filter(Boolean).join(', ');
+
+  const prompt = `Kamu adalah expert PFM (Professional Financial Modeler) dari International Financial Modeling Institute (IFMI). Analisis model keuangan Excel berikut secara komprehensif.
+
+STANDAR PFM yang harus dicakup model lengkap:
+Section 1 - Laporan Keuangan: Balance Sheet, Income Statement, Cash Flow Statement, COGS, OpCost, Fixed Asset & Depresiasi
+Section 2 - Forecasting: Data historis, trend, asumsi macro & micro
+Section 3 - Proyeksi: Working Capital Model, Debt Schedule, IDC, FX assumptions
+Section 4 - Valuasi: WACC, DCF FCFF, DCF FCFE, Enterprise Value, DDM, Residual Income, Price Multiples
+Section 5 - Project Model: Capex schedule, NPV/IRR analysis, feasibility
+Section 6 - Sustainability: Ratio analysis, Common Size, Index Analysis, Sensitivity/Scenario
+Section 7 - Credit Analysis: CFADS, DSCR, LLCR, Altman Z-Score
+
+DATA MODEL YANG DIUPLOAD:
+${sheetSummary}
+
+DIMINTA: Lakukan analisis fokus pada: ${optsLabel}
+
+INSTRUKSI RESPONS:
+- Tulis dalam Bahasa Indonesia yang jelas dan profesional
+- Gunakan format markdown dengan heading ### untuk setiap bagian
+- Untuk setiap komponen PFM, beri status: ✅ Ada | ⚠️ Ada tapi perlu perbaikan | ❌ Tidak ditemukan
+- Identifikasi sheet-sheet yang relevan dari data yang diupload
+- Beri skor kelengkapan 0-100% dan jelaskan
+- Berikan 3-5 rekomendasi spesifik yang actionable
+- Highlight gap paling kritikal yang perlu segera diisi
+- Jangan terlalu panjang - fokus pada insight yang berguna
+- Gunakan analogi sederhana untuk menjelaskan temuan penting`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
     });
+
+    clearInterval(loadTimer);
+    document.getElementById('loadingBar').style.width = '100%';
+
+    const data = await response.json();
+    const text = data.content?.map(c => c.text || '').join('') || 'Tidak ada respons dari AI.';
+
+    document.getElementById('statusDot').className = 'result-dot green';
+    document.getElementById('resultTitle').textContent = `Analisis selesai · ${workbookData.fileName}`;
+    renderResult(text);
+  } catch(err) {
+    clearInterval(loadTimer);
+    document.getElementById('resultContent').innerHTML = `<p style="color:#f87171">❌ Error: ${err.message}</p><p style="color:#666;font-size:.8rem;margin-top:.5rem">Pastikan API key sudah dikonfigurasi dengan benar.</p>`;
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🤖 Analisis dengan AI';
+}
+
+function renderResult(text) {
+  // Convert markdown to styled HTML
+  let html = text
+    .replace(/### (.*)/g, '<h3>$1</h3>')
+    .replace(/## (.*)/g, '<h3>$1</h3>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/✅/g, '<span class="good">✅</span>')
+    .replace(/⚠️/g, '<span class="warn">⚠️</span>')
+    .replace(/❌/g, '<span class="bad">❌</span>')
+    .replace(/^- (.*)/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+    .split('\n\n').map(p => {
+      if (p.startsWith('<h') || p.startsWith('<ul')) return p;
+      return `<p>${p}</p>`;
+    }).join('');
+
+  document.getElementById('resultContent').innerHTML = `<div class="stream-text">${html}</div>`;
+}
+
+// ── DEMO ──
+function loadLambdaDemo() {
+  document.getElementById('resultTitle').textContent = 'Demo Analisis: Lambda Corporation 2021';
+  document.getElementById('statusDot').className = 'result-dot green';
+  document.getElementById('loadingBar').style.width = '100%';
+  document.getElementById('analyzeBtn').disabled = false;
+
+  const demoText = `### 🎯 Skor Kelengkapan Model: **96/100** ✅
+
+Model Lambda Corporation 2021 adalah **contoh model PFM paling lengkap** yang bisa dijadikan benchmark. Hampir semua komponen standar IFMI terpenuhi dengan sangat baik.
+
+---
+
+### Section 1 – Laporan Keuangan ✅ Lengkap
+✅ **Balance Sheet (BS)** — Data historis 2013-2016 tersedia lengkap  
+✅ **Income Statement (IS)** — Termasuk breakdown EBITDA  
+✅ **Cash Flow Statement (CF)** — Metode tidak langsung (indirect method)  
+✅ **COGS Breakdown** — Dipisah per produk A (manufactured) dan B (trading) + FX Gain/Loss  
+✅ **OpCost** — Operating cost terperinci  
+✅ **Fixed Asset & Depresiasi** — Multi-aset dengan Construction in Progress (Proyek Antares)
+
+---
+
+### Section 2 – Forecasting ✅ Baik
+✅ **Data historis** — Harga produk A & B dari 2004-2016 tersedia  
+✅ **Asumsi macro** — Inflasi 4.8%, suku bunga IDR & USD, kurs FX  
+⚠️ **Trend analysis** — Harga menggunakan tren linear sederhana. **Bisa diperkuat** dengan regresi atau autoregressive  
+
+---
+
+### Section 3 – Proyeksi Keuangan ✅ Sangat Lengkap
+✅ **WCM (Working Capital Model)** — Days of receivables, inventory, payables tersedia  
+✅ **Debt Schedule** — Termasuk project loan Antares dengan drawdown schedule  
+✅ **IDC** — Interest During Construction untuk Proyek Antares diperhitungkan  
+✅ **FX Gain/Loss** — 30-40% item neraca diexpose ke FX risk  
+✅ **Continuous Capex** — Capex ratio 2.3x dari incremental revenue  
+
+---
+
+### Section 4 – Valuasi ✅ Sangat Lengkap
+✅ **WACC** — Beta dari data historis saham + Hamada equation untuk non-public  
+✅ **DCF FCFF & FCFE** — Single rate dan term structure  
+✅ **Enterprise Value DCF** — Dengan EV conversion  
+✅ **Dividend Discount Model** — Tersedia  
+✅ **Residual Income** — Tersedia  
+✅ **Price Multiples** — P/E, P/BV, EV/EBITDA tersedia  
+
+---
+
+### Section 6 – Sustainability & Risk ✅ Lengkap
+✅ **Ratio Analysis** — Profitabilitas, likuiditas, solvabilitas  
+✅ **Common Size Analysis** — Revenue-based  
+✅ **Index Analysis** — Base year comparison  
+✅ **Sensitivity Analysis** — Scenario analysis tersedia  
+⚠️ **Duration analysis** — Equity Duration belum terlihat sebagai sheet terpisah  
+
+---
+
+### Section 7 – Analisis Kredit ✅ Lengkap
+✅ **CFADS** — Dihitung terpisah dari sheet CFADS  
+✅ **Credit Analysis** — DSCR dan LLCR tersedia  
+✅ **Altman Z-Score** — Sheet tersedia  
+
+---
+
+### 🔥 3 Rekomendasi Peningkatan
+
+**1. Tambahkan statistical forecasting** — Saat ini asumsi harga menggunakan tren linear sederhana. Pertimbangkan menambahkan sheet dengan regresi atau autoregressive method untuk membandingkan akurasi prediksi.
+
+**2. Lengkapi Duration Analysis** — Equity Duration, NPV Duration, dan Factor Sensitivity Duration belum terlihat sebagai sheet terpisah — ini topik penting di Section VI PFM BOK.
+
+**3. Tambahkan Monte Carlo simulation** — Model saat ini menggunakan skenario deterministik. Monte Carlo untuk asumsi kunci (harga, volume, FX) akan sangat memperkuat analisis risiko.
+
+---
+
+*Model ini sudah melampaui standar minimum PFM dan layak dijadikan referensi pembelajaran.*`;
+
+  renderResult(demoText);
+}
+
+// ── DRAG EVENTS ──
+document.addEventListener('dragover', e => e.preventDefault());
 </script>
+</body>
+</html>
