@@ -1,0 +1,385 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f8f9fa;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Navigation */
+.navbar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-menu a {
+    color: white;
+    text-decoration: none;
+    transition: opacity 0.3s;
+}
+
+.nav-menu a:hover {
+    opacity: 0.8;
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 6rem 0;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.cta-button {
+    display: inline-block;
+    background: #ffd700;
+    color: #333;
+    padding: 12px 30px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Formulas Section */
+.formulas {
+    padding: 4rem 0;
+    background-color: white;
+}
+
+.formulas h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #667eea;
+}
+
+.formula-card {
+    background: white;
+    border-left: 5px solid #667eea;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.formula-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.formula-card h3 {
+    color: #764ba2;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.formula-box {
+    background: #f0f4ff;
+    padding: 1.5rem;
+    border-radius: 5px;
+    margin-bottom: 1.5rem;
+    border-left: 3px solid #ffd700;
+}
+
+.formula-box p {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.formula-box ul {
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.formula-box li {
+    margin-bottom: 0.3rem;
+}
+
+.explanation {
+    margin-top: 1.5rem;
+}
+
+.explanation h4 {
+    color: #667eea;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.explanation ul {
+    margin-left: 1.5rem;
+}
+
+.explanation li {
+    margin-bottom: 0.5rem;
+}
+
+/* Calculators Section */
+.calculators {
+    padding: 4rem 0;
+    background: #f8f9fa;
+}
+
+.calculators h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #667eea;
+}
+
+.calc-card {
+    background: white;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.calc-card h3 {
+    color: #764ba2;
+    margin-bottom: 1.5rem;
+}
+
+.calc-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.input-group input,
+.input-group select {
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.calc-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.3s;
+    font-size: 1rem;
+}
+
+.calc-btn:hover {
+    transform: translateY(-2px);
+}
+
+.result {
+    background: #f0f4ff;
+    padding: 1.5rem;
+    border-radius: 5px;
+    margin-top: 1rem;
+    border-left: 4px solid #ffd700;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+}
+
+.result-empty {
+    color: #999;
+    font-style: italic;
+}
+
+.result-content {
+    width: 100%;
+}
+
+.result-content p {
+    margin-bottom: 0.5rem;
+}
+
+.result-content strong {
+    color: #667eea;
+}
+
+/* Guide Section */
+.guide {
+    padding: 4rem 0;
+    background: white;
+}
+
+.guide h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #667eea;
+}
+
+.guide-card {
+    background: #f8f9fa;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    border-left: 5px solid #ffd700;
+}
+
+.guide-card h3 {
+    color: #764ba2;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.guide-card ul,
+.guide-card ol {
+    margin-left: 1.5rem;
+}
+
+.guide-card li {
+    margin-bottom: 0.8rem;
+    line-height: 1.8;
+}
+
+/* Footer */
+.footer {
+    background: #333;
+    color: white;
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+.footer p {
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .nav-menu {
+        gap: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+    }
+
+    .formulas h2,
+    .calculators h2,
+    .guide h2 {
+        font-size: 1.8rem;
+    }
+
+    .formula-card,
+    .calc-card,
+    .guide-card {
+        padding: 1.5rem;
+    }
+
+    .calc-form {
+        grid-template-columns: 1fr;
+    }
+
+    .formula-box p {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar .container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .nav-menu {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+
+    .hero {
+        padding: 3rem 0;
+    }
+
+    .hero h1 {
+        font-size: 1.5rem;
+    }
+
+    .formulas h2,
+    .calculators h2,
+    .guide h2 {
+        font-size: 1.5rem;
+    }
+
+    .formula-card h3,
+    .calc-card h3,
+    .guide-card h3 {
+        font-size: 1.1rem;
+    }
+}
